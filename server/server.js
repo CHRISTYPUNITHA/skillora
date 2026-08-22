@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
+import courseRoutes from "./routes/course.routes.js";
 import {prisma} from "./lib/prisma.js";
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(cors({
 }))
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/course", courseRoutes);
 
 const port = process.env.PORT || 3000;
 
