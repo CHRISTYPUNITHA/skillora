@@ -1,78 +1,106 @@
-/**
- * LoginPage.jsx
- * "Welcome Back 👋" — Email + Password form, social auth, link to Signup
- */
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import AuthLayout from './AuthLayout'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import AuthLayout from "./AuthLayout";
+import {useAuth} from '../../context/AuthContext'
 
-/* Password visibility toggle icon */
 function EyeIcon({ open }) {
-  return open ? '🙈' : '👁️'
+  return open ? "🙈" : "👁️";
 }
 
-/* Simple inline validation */
 function validate(email, password) {
-  const errors = {}
-  if (!email)                          errors.email    = 'Email is required.'
-  else if (!/\S+@\S+\.\S+/.test(email)) errors.email  = 'Enter a valid email.'
-  if (!password)                        errors.password = 'Password is required.'
-  else if (password.length < 6)         errors.password = 'Minimum 6 characters.'
-  return errors
+  const errors = {};
+  if (!email) errors.email = "Email is required.";
+  else if (!/\S+@\S+\.\S+/.test(email)) errors.email = "Enter a valid email.";
+  if (!password) errors.password = "Password is required.";
+  else if (password.length < 6) errors.password = "Minimum 6 characters.";
+  return errors;
 }
 
 export default function LoginPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { loginUser } = useAuth();
 
-  const [form, setForm]       = useState({ email: '', password: '' })
-  const [errors, setErrors]   = useState({})
-  const [showPwd, setShowPwd] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [toast, setToast]     = useState(null)
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({});
+  const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
-  /* Update field + clear error on type */
   function handleChange(e) {
-    const { name, value } = e.target
-    setForm((f) => ({ ...f, [name]: value }))
-    if (errors[name]) setErrors((er) => ({ ...er, [name]: null }))
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+    if (errors[name]) setErrors((er) => ({ ...er, [name]: null }));
   }
 
-  /* Show temp toast */
   function showToast(icon, msg) {
-    setToast({ icon, msg })
-    setTimeout(() => setToast(null), 3200)
+    setToast({ icon, msg });
+    setTimeout(() => setToast(null), 3200);
   }
 
-  /* Submit handler (mocked) */
   async function handleSubmit(e) {
-    e.preventDefault()
-    const errs = validate(form.email, form.password)
-    if (Object.keys(errs).length) { setErrors(errs); return }
-
-    setLoading(true)
-    /* Simulate API call */
-    await new Promise((r) => setTimeout(r, 1400))
-    setLoading(false)
-    showToast('✅', 'Signed in! Taking you to your dashboard…')
-    setTimeout(() => navigate('/dashboard'), 1000)
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const errs = validate(form.email, form.password);
+      if (Object.keys(errs).length) {
+        setErrors(errs);
+        return;
+      }
+      const res = await loginUser(form);
+      
+      if (res?.success) {
+        showToast("✅", "Signed in! Taking you to your dashboard…");
+        setTimeout(() => navigate('/dashboard'), 1000);
+      } else {
+        showToast("❌", "Login failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      showToast("❌", "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <AuthLayout>
-      <div className="w-full max-w-[420px] bg-white border border-gray-200 rounded-[20px] md:rounded-[24px] px-[22px] py-[28px] pb-6 md:p-10 md:pb-9 relative z-10 animate-card-slide-up" role="main">
+      <div
+        className="w-full max-w-[420px] bg-white border border-gray-200 rounded-[20px] md:rounded-[24px] px-[22px] py-[28px] pb-6 md:p-10 md:pb-9 relative z-10 animate-card-slide-up"
+        role="main"
+      >
         {/* Header */}
-        <span className="text-[32px] mb-2 block" aria-hidden="true">👋</span>
-        <h1 className="text-[22px] font-extrabold text-gray-900 tracking-[-0.02em] mb-1">Welcome Back</h1>
-        <p className="text-[13.5px] text-gray-500 mb-7">Sign in to continue your learning journey.</p>
+        <span className="text-[32px] mb-2 block" aria-hidden="true">
+          👋
+        </span>
+        <h1 className="text-[22px] font-extrabold text-gray-900 tracking-[-0.02em] mb-1">
+          Welcome Back
+        </h1>
+        <p className="text-[13.5px] text-gray-500 mb-7">
+          Sign in to continue your learning journey.
+        </p>
 
         {/* Form */}
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate aria-label="Sign in form">
-
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmit}
+          noValidate
+          aria-label="Sign in form"
+        >
           {/* Email */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12.5px] font-semibold text-gray-700 tracking-[0.01em]" htmlFor="login-email">Email address</label>
+            <label
+              className="text-[12.5px] font-semibold text-gray-700 tracking-[0.01em]"
+              htmlFor="login-email"
+            >
+              Email address
+            </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-[15px] text-gray-400 pointer-events-none z-10 leading-none" aria-hidden="true">✉️</span>
+              <span
+                className="absolute left-3.5 text-[15px] text-gray-400 pointer-events-none z-10 leading-none"
+                aria-hidden="true"
+              >
+                ✉️
+              </span>
               <input
                 id="login-email"
                 name="email"
@@ -81,13 +109,19 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={form.email}
                 onChange={handleChange}
-                className={`w-full h-11 pl-[42px] pr-3.5 text-[13.5px] text-gray-900 bg-gray-25 border-[1.5px] rounded-xl outline-none transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:border-purple-500 focus:bg-white focus:shadow-[0_0_0_3.5px_rgba(124,92,252,0.12)] ${errors.email ? 'border-red-400 shadow-[0_0_0_3.5px_rgba(248,113,113,0.10)]' : 'border-gray-200'}`}
-                aria-describedby={errors.email ? 'login-email-error' : undefined}
+                className={`w-full h-11 pl-[42px] pr-3.5 text-[13.5px] text-gray-900 bg-gray-25 border-[1.5px] rounded-xl outline-none transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:border-purple-500 focus:bg-white focus:shadow-[0_0_0_3.5px_rgba(124,92,252,0.12)] ${errors.email ? "border-red-400 shadow-[0_0_0_3.5px_rgba(248,113,113,0.10)]" : "border-gray-200"}`}
+                aria-describedby={
+                  errors.email ? "login-email-error" : undefined
+                }
                 aria-invalid={!!errors.email}
               />
             </div>
             {errors.email && (
-              <span className="text-[11.5px] text-red-400 flex items-center gap-[5px]" id="login-email-error" role="alert">
+              <span
+                className="text-[11.5px] text-red-400 flex items-center gap-[5px]"
+                id="login-email-error"
+                role="alert"
+              >
                 ⚠ {errors.email}
               </span>
             )}
@@ -95,32 +129,48 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12.5px] font-semibold text-gray-700 tracking-[0.01em]" htmlFor="login-password">Password</label>
+            <label
+              className="text-[12.5px] font-semibold text-gray-700 tracking-[0.01em]"
+              htmlFor="login-password"
+            >
+              Password
+            </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-[15px] text-gray-400 pointer-events-none z-10 leading-none" aria-hidden="true">🔒</span>
+              <span
+                className="absolute left-3.5 text-[15px] text-gray-400 pointer-events-none z-10 leading-none"
+                aria-hidden="true"
+              >
+                🔒
+              </span>
               <input
                 id="login-password"
                 name="password"
-                type={showPwd ? 'text' : 'password'}
+                type={showPwd ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder="Enter your password"
                 value={form.password}
                 onChange={handleChange}
-                className={`w-full h-11 pl-[42px] pr-3.5 text-[13.5px] text-gray-900 bg-gray-25 border-[1.5px] rounded-xl outline-none transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:border-purple-500 focus:bg-white focus:shadow-[0_0_0_3.5px_rgba(124,92,252,0.12)] ${errors.password ? 'border-red-400 shadow-[0_0_0_3.5px_rgba(248,113,113,0.10)]' : 'border-gray-200'}`}
-                aria-describedby={errors.password ? 'login-pwd-error' : undefined}
+                className={`w-full h-11 pl-[42px] pr-3.5 text-[13.5px] text-gray-900 bg-gray-25 border-[1.5px] rounded-xl outline-none transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:border-purple-500 focus:bg-white focus:shadow-[0_0_0_3.5px_rgba(124,92,252,0.12)] ${errors.password ? "border-red-400 shadow-[0_0_0_3.5px_rgba(248,113,113,0.10)]" : "border-gray-200"}`}
+                aria-describedby={
+                  errors.password ? "login-pwd-error" : undefined
+                }
                 aria-invalid={!!errors.password}
               />
               <button
                 type="button"
                 className="absolute right-3.5 bg-transparent border-none cursor-pointer text-gray-400 text-[15px] p-1 flex items-center transition-colors duration-200 hover:text-gray-600 z-10"
                 onClick={() => setShowPwd((s) => !s)}
-                aria-label={showPwd ? 'Hide password' : 'Show password'}
+                aria-label={showPwd ? "Hide password" : "Show password"}
               >
                 <EyeIcon open={showPwd} />
               </button>
             </div>
             {errors.password && (
-              <span className="text-[11.5px] text-red-400 flex items-center gap-[5px]" id="login-pwd-error" role="alert">
+              <span
+                className="text-[11.5px] text-red-400 flex items-center gap-[5px]"
+                id="login-pwd-error"
+                role="alert"
+              >
                 ⚠ {errors.password}
               </span>
             )}
@@ -133,7 +183,7 @@ export default function LoginPage() {
               type="button"
               className="text-[12.5px] text-purple-500 font-medium transition-colors duration-200 hover:text-purple-600 hover:underline bg-transparent border-none cursor-pointer p-0"
               id="btn-forgot-password"
-              onClick={() => showToast('📧', 'Password reset email sent!')}
+              onClick={() => showToast("📧", "Password reset email sent!")}
             >
               Forgot password?
             </button>
@@ -149,7 +199,10 @@ export default function LoginPage() {
           >
             {loading ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/35 border-t-white rounded-full animate-spin" aria-hidden="true" />
+                <span
+                  className="w-4 h-4 border-2 border-white/35 border-t-white rounded-full animate-spin"
+                  aria-hidden="true"
+                />
                 Signing in…
               </>
             ) : (
@@ -191,18 +244,26 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-6 pt-5 border-t border-gray-100 text-[13px] text-gray-500 [&>a]:text-purple-500 [&>a]:font-semibold [&>a]:transition-colors [&>a:hover]:text-purple-600 [&>a:hover]:underline">
-          Don't have an account?{' '}
-          <Link to="/signup" id="link-to-signup">Sign up</Link>
+          Don't have an account?{" "}
+          <Link to="/signup" id="link-to-signup">
+            Sign up
+          </Link>
         </div>
       </div>
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-[999] flex items-center gap-2.5 px-4.5 py-3.5 bg-gray-900 border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] animate-toast-in" role="status" aria-live="polite">
+        <div
+          className="fixed bottom-6 right-6 z-[999] flex items-center gap-2.5 px-4.5 py-3.5 bg-gray-900 border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] animate-toast-in"
+          role="status"
+          aria-live="polite"
+        >
           <span className="text-[18px]">{toast.icon}</span>
-          <span className="text-[13px] font-medium text-white/85">{toast.msg}</span>
+          <span className="text-[13px] font-medium text-white/85">
+            {toast.msg}
+          </span>
         </div>
       )}
     </AuthLayout>
-  )
+  );
 }
