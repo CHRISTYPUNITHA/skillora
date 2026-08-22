@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from './AuthLayout'
-import {signup} from '../../services/auth.serivces.js'
+import { useAuth } from '../../context/AuthContext'
 
 function EyeIcon({ open }) {
   return open ? '🙈' : '👁️'
@@ -34,6 +34,7 @@ function validate(name, email, password, agreed) {
 
 export default function SignupPage() {
   const navigate = useNavigate()
+  const { signupUser } = useAuth()
 
   const [form, setForm]       = useState({ name: '', email: '', password: '' })
   const [agreed, setAgreed]   = useState(false)
@@ -64,16 +65,19 @@ export default function SignupPage() {
       e.preventDefault()
       const errs = validate(form.name, form.email, form.password, agreed)
       if (Object.keys(errs).length) { setErrors(errs); return }
-      const res = await signup(form)
-      if(res.success){
+      
+      const res = await signupUser(form)
+      if (res && res.success !== false) {
         showToast('🎉', 'Account created! Welcome to Skillora 🚀')
         setTimeout(() => navigate('/courses'), 1000)
+      } else {
+        showToast('❌', res?.message || 'Registration Failed')
       }
     }
     catch(error){
       setLoading(false)
       console.log(error)
-      showToast("❌", "Registration Failed")
+      showToast("❌", error.response?.data?.message || "Registration Failed")
     }
   }
 

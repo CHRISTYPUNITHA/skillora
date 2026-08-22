@@ -1,17 +1,4 @@
-/**
- * App.jsx — Root router
- * Routes:
- *   /                   → Landing Page
- *   /courses            → Courses (Explore) Page
- *   /courses/:slug      → Course Detail Page
- *   /login              → Login Page
- *   /signup             → Signup Page
- *   /dashboard          → Dashboard Page
- *   /checkout           → Checkout Page
- *   /my-learning        → My Learning Page
- *   /payment-success    → Payment Success Page
- *   *                   → Redirect to /
- */
+
 import { Routes, Route, Navigate } from 'react-router-dom'
 
 
@@ -20,12 +7,12 @@ import CoursesPage      from './pages/CoursesPage'
 import CourseDetailPage from './pages/CourseDetailPage'
 import LoginPage        from './pages/auth/LoginPage'
 import SignupPage       from './pages/auth/SignupPage'
-import DashboardPage    from './pages/dashboard/DashboardPage'
 import CheckoutPage     from './pages/CheckoutPage'
 import MyLearningPage   from './pages/MyLearningPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
-import {useAuth} from "./context/AuthContext"
-import { useLocation } from 'react-router-dom'
+import { useAuth } from './context/AuthContext';
+import { useLocation } from 'react-router-dom';
+
 
 export default function App() {
   const { user } = useAuth();
@@ -34,7 +21,7 @@ export default function App() {
   
 
   if (user && ['/', '/login', '/signup'].includes(location.pathname)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/courses" replace />;
   }
 
   return (
@@ -44,7 +31,6 @@ export default function App() {
       <Route path="/courses/:slug"    element={<CourseDetailPage />} />
       <Route path="/login"            element={<LoginPage />}        />
       <Route path="/signup"           element={<SignupPage />}        />
-      <Route path="/dashboard"        element={<DashboardPage />}    />
       <Route path="/checkout"          element={<CheckoutPage />}        />
       <Route path="/my-learning"       element={<MyLearningPage />}      />
       <Route path="/payment-success"   element={<PaymentSuccessPage />}  />

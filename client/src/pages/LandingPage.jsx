@@ -52,47 +52,46 @@ const COURSES = [
 ]
 
 const FEATURES = [
-  { icon: '🏗️', color: 'purple', title: 'Learn by Building',     desc: 'Hands-on projects and practical examples in every course. No fluff, just real-world code.' },
-  { icon: '📈', color: 'teal',   title: 'Track Your Progress',   desc: 'Smart progress tracking, streaks, and achievements keep you motivated every day.' },
-  { icon: '♾️', color: 'amber',  title: 'Lifetime Access',       desc: 'Pay once and learn forever. All future updates to the course are included.' },
-  { icon: '🎓', color: 'green',  title: 'Certificates',          desc: 'Earn shareable certificates upon completion to showcase your skills to employers.' },
-  { icon: '💬', color: 'rose',   title: 'Community Support',     desc: 'Join thousands of learners in our Discord community and get help when you need it.' },
-  { icon: '📱', color: 'blue',   title: 'Learn Anywhere',        desc: 'Fully responsive platform — learn on desktop, tablet or mobile, any time.' },
+  { icon: '🏗️', color: 'purple', title: 'Learn by Building', desc: 'Hands-on projects and practical examples in every course. No fluff, just real-world code.' },
+  { icon: '📈', color: 'teal', title: 'Track Your Progress', desc: 'Smart progress tracking, streaks, and achievements keep you motivated every day.' },
+  { icon: '♾️', color: 'amber', title: 'Lifetime Access', desc: 'Pay once and learn forever. All future updates to the course are included.' },
+  { icon: '🎓', color: 'green', title: 'Certificates', desc: 'Earn shareable certificates upon completion to showcase your skills to employers.' },
+  { icon: '💬', color: 'rose', title: 'Community Support', desc: 'Join thousands of learners in our Discord community and get help when you need it.' },
+  { icon: '📱', color: 'blue', title: 'Learn Anywhere', desc: 'Fully responsive platform — learn on desktop, tablet or mobile, any time.' },
 ]
 
 const TESTIMONIALS = [
   {
     stars: 5,
     quote: '"Skillora transformed my career. The Full-Stack course was incredibly practical — I landed my first dev job within 3 months of completing it."',
-    name: 'Rahul Mehta',
+    name: 'Rahul',
     role: 'Full-Stack Developer at Razorpay',
-    initials: 'RM',
+    initials: 'R',
     bg: 'linear-gradient(135deg,#7C5CFC,#5A3DE8)',
   },
   {
     stars: 5,
     quote: '"The React course is the best I\'ve taken online. The instructor explains complex patterns in such a clear, concise way. Worth every rupee!"',
-    name: 'Priya Sharma',
+    name: 'Sam',
     role: 'Frontend Engineer at Swiggy',
-    initials: 'PS',
+    initials: 'S',
     bg: 'linear-gradient(135deg,#0E3B2E,#14B87F)',
   },
   {
     stars: 5,
     quote: '"I\'ve tried many platforms but Skillora\'s project-based approach finally made concepts click. The Node.js API course alone paid for itself."',
-    name: 'Aditya Nair',
+    name: 'Mani',
     role: 'Backend Developer at PhonePe',
-    initials: 'AN',
+    initials: 'M',
     bg: 'linear-gradient(135deg,#2A1A00,#E8A33D)',
   },
 ]
 
 const NAV_LINKS = [
-  { label: 'Home',    href: '#home' },
+  { label: 'Home', href: '#home' },
   { label: 'Courses', href: '#courses' },
-  { label: 'About',   href: '#about' },
+  { label: 'About', href: '#about' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'Contact', href: '#contact' },
 ]
 
 /* ─────────────────────────────────────────────────────────
@@ -128,8 +127,7 @@ function Navbar() {
     <nav className={`navbar${scrolled ? ' scrolled' : ''}`} id="navbar" aria-label="Main navigation">
       <div className="navbar__inner">
         <Link to="/" className="navbar__logo" aria-label="Skillora home">
-          <div className="navbar__logo-icon">⚡</div>
-          <span>Skillora</span>
+          <img src="/logo_skillora.png" alt="Skillora Logo" style={{ height: '40px', width: 'auto', objectFit: 'contain' }} />
         </Link>
 
         <ul className="navbar__nav" role="list">
@@ -141,7 +139,7 @@ function Navbar() {
         </ul>
 
         <div className="navbar__actions">
-          <Link to="/login"  className="btn-ghost"   id="btn-login">Login ↓</Link>
+          <Link to="/login" className="btn-ghost" id="btn-login">Login ↓</Link>
           <Link to="/signup" className="btn-primary" id="btn-get-started">Get Started ✦</Link>
         </div>
       </div>
@@ -165,7 +163,7 @@ function Hero() {
             left: `${(i * 8.3) % 100}%`,
             animationDuration: `${8 + (i % 5) * 2}s`,
             animationDelay: `${(i * 0.7) % 5}s`,
-            width:  `${1 + (i % 3)}px`,
+            width: `${1 + (i % 3)}px`,
             height: `${1 + (i % 3)}px`,
           }} />
         ))}
@@ -201,10 +199,10 @@ function Hero() {
 
           <div className="hero-stats" role="list" aria-label="Platform statistics">
             {[
-              { value: '3+',    label: 'Courses' },
-              { value: '500+',  label: 'Students' },
+              { value: '3+', label: 'Courses' },
+              { value: '500+', label: 'Students' },
               { value: '4.9 ★', label: 'Average Rating' },
-              { value: '100+',  label: 'Hours of Content' },
+              { value: '100+', label: 'Hours of Content' },
             ].map((s, i) => (
               <>
                 {i > 0 && <div key={`sep-${i}`} className="hero-stat-divider" aria-hidden="true" />}
@@ -231,11 +229,11 @@ function Hero() {
                   <svg width="90" height="90" viewBox="0 0 90 90" aria-hidden="true">
                     <defs>
                       <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%"   stopColor="#7C5CFC" />
+                        <stop offset="0%" stopColor="#7C5CFC" />
                         <stop offset="100%" stopColor="#2DD4E0" />
                       </linearGradient>
                     </defs>
-                    <circle className="progress-ring-bg"   cx="45" cy="45" r="39" />
+                    <circle className="progress-ring-bg" cx="45" cy="45" r="39" />
                     <circle className="progress-ring-fill" cx="45" cy="45" r="39" />
                   </svg>
                   <div className="progress-ring-label" aria-label="72 percent complete">
@@ -293,10 +291,10 @@ function Hero() {
 ───────────────────────────────────────────────────────── */
 function StatsBand() {
   const items = [
-    { icon: '📚', bg: 'rgba(124,92,252,0.10)', value: '3+',    label: 'Expert Courses' },
-    { icon: '👨‍💻', bg: 'rgba(45,212,224,0.10)', value: '500+',  label: 'Active Students' },
-    { icon: '⭐', bg: 'rgba(251,146,60,0.10)',  value: '4.9/5', label: 'Average Rating' },
-    { icon: '🎓', bg: 'rgba(74,222,128,0.10)', value: '200+',  label: 'Certificates Issued' },
+    { icon: '📚', bg: 'rgba(124,92,252,0.10)', value: '3+', label: 'Expert Courses' },
+    { icon: '👨‍💻', bg: 'rgba(45,212,224,0.10)', value: '500+', label: 'Active Students' },
+    { icon: '⭐', bg: 'rgba(251,146,60,0.10)', value: '4.9/5', label: 'Average Rating' },
+    { icon: '🎓', bg: 'rgba(74,222,128,0.10)', value: '200+', label: 'Certificates Issued' },
   ]
   return (
     <div className="stats-band" id="stats" role="region" aria-label="Platform statistics">
@@ -477,7 +475,7 @@ function CTASection() {
           </a>
         </div>
         <div className="cta-note fade-up fade-up-delay-3">
-          {['30-day money-back guarantee', 'No subscription required', 'Lifetime access'].map((note) => (
+          {['No subscription required', 'Lifetime access'].map((note) => (
             <span key={note} className="cta-note-item">
               <span aria-hidden="true">✓</span> {note}
             </span>
@@ -493,9 +491,8 @@ function CTASection() {
 ───────────────────────────────────────────────────────── */
 function Footer() {
   const cols = [
-    { heading: 'Courses', links: ['Full-Stack Foundations', 'React Product Engineering', 'Node.js API Architecture', 'Coming Soon'] },
-    { heading: 'Company', links: ['About', 'Blog', 'Careers', 'Press'] },
-    { heading: 'Support', links: ['Help Center', 'Contact Us', 'Privacy Policy', 'Terms of Service'] },
+    { heading: 'Courses', links: ['Full-Stack Foundations', 'React Product Engineering', 'Node.js API Architecture'] },
+    { heading: 'Support', links: ['Help Center', 'Privacy Policy', 'Terms of Service'] },
   ]
   return (
     <footer className="footer" id="contact" role="contentinfo">
@@ -503,8 +500,7 @@ function Footer() {
         <div className="footer-top">
           <div>
             <div className="footer-brand__logo">
-              <div className="navbar__logo-icon">⚡</div>
-              <span style={{ fontSize: 17, fontWeight: 700, color: '#FFF' }}>Skillora</span>
+              <img src="/logo_skillora.png" alt="Skillora Logo" style={{ height: '40px', width: 'auto', objectFit: 'contain' }} />
             </div>
             <p className="footer-brand__desc">
               Practical courses for developers who want real-world skills and build amazing products.
@@ -528,12 +524,7 @@ function Footer() {
         </div>
         <div className="footer-divider" aria-hidden="true" />
         <div className="footer-bottom">
-          <p className="footer-bottom__copy">© {new Date().getFullYear()} Skillora. All rights reserved. Made with ❤️ in India.</p>
-          <div className="footer-bottom__links">
-            {['Privacy', 'Terms', 'Cookies'].map((l) => (
-              <a key={l} href="#" className="footer-bottom__link">{l}</a>
-            ))}
-          </div>
+          <p className="footer-bottom__copy">© {new Date().getFullYear()} Skillora. All rights reserved.</p>
         </div>
       </div>
     </footer>
