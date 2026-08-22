@@ -3,10 +3,12 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import courseRoutes from "./routes/course.routes.js";
 import {prisma} from "./lib/prisma.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -14,7 +16,7 @@ app.use(cors({
 }))
 
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/course", courseRoutes);
+app.use("/api/v1/courses", courseRoutes);
 
 const port = process.env.PORT || 3000;
 

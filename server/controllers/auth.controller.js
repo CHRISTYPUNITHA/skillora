@@ -22,7 +22,7 @@ export const RegisterUser = async (req, res) => {
             },
         });
 
-        res.status(201).json({ message: 'User registered successfully', user: newUser });
+        res.status(201).json({success: true, message: 'User registered successfully', user: newUser });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -43,23 +43,39 @@ export const LoginUser = async (req, res) => {
         }
         const token = generateToken(user);
         res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
-        res.status(200).json({ message: 'Login successful', token });
+        res.status(200).json({ success: true, message: 'Login successful', token });
     }catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+
+export const currentUser = async (req, res) => {
+    try {
+        const user = req.user.id;
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+        const userData = await prisma.user.findUnique({
+            where: { id: user },
+        });
+        res.status(200).json({ user: userData });
+    } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-export const currentUser = async (req, res) => {
-    try {
-        const token = req.cookies.token;
-        const decoded = verifyToken(token);
-        if (!decoded) {
-            return res.status(401).json({ message: 'Unauthorized' });
+export const LogoutUser = async (req, res) => {
+    try{
+        const user = req.user.id;
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
         }
-        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
-        res.status(200).json({ user });
-    } catch (error) {
+        res.clearCookie('token');
+        res.status(200).json({ message: 'Logout successful' });
+    }catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }

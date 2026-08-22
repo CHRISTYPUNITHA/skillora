@@ -3,6 +3,9 @@ import {verifyToken} from "../utils/jwt.token.js"
 export const authendicateToken = (req, res, next) => {
     try {
         const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
         const decoded = verifyToken(token);
         if (!decoded) {
             return res.status(401).json({ message: 'Unauthorized' });

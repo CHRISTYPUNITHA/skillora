@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { getAllcourses } from '../services/courses.services.js'
 import { Search, Bell, Clock, BookOpen, Award } from 'lucide-react'
 import { Button } from '../component/ui/Button'
 import { Input } from '../component/ui/Input'
@@ -9,65 +10,7 @@ import { Badge } from '../component/ui/Badge'
 import { Tabs, TabsList, TabsTrigger } from '../component/ui/Tabs'
 import '../App.css'
 
-/* ─────────────────────────────────────────────────────────
-   Data
-───────────────────────────────────────────────────────── */
-const COURSES = [
-  {
-    id: 1,
-    slug: 'full-stack-foundations',
-    thumbClass: 'bg-gradient-thumbnail',
-    thumbIcon: '🚀',
-    level: 'Beginner to Intermediate',
-    levelColor: 'green',
-    title: 'Full-Stack Foundations',
-    desc: 'Build production-ready full-stack web applications from scratch with React, Node.js, Express and PostgreSQL.',
-    hours: '8h 20m',
-    lessons: 32,
-    price: '₹799',
-    rating: 4.9,
-    students: 312,
-    bestseller: true,
-    certificate: true,
-    tags: ['Beginner', 'Full-Stack'],
-  },
-  {
-    id: 2,
-    slug: 'react-product-engineering',
-    thumbClass: 'bg-gradient-thumbnail-2',
-    thumbIcon: '⚛️',
-    level: 'Intermediate',
-    levelColor: 'blue',
-    title: 'React Product Engineering',
-    desc: 'Master advanced React patterns, state management, performance and testing. Build like a senior engineer.',
-    hours: '6h 40m',
-    lessons: 28,
-    price: '₹999',
-    rating: 4.8,
-    students: 198,
-    bestseller: false,
-    certificate: true,
-    tags: ['Intermediate', 'Frontend'],
-  },
-  {
-    id: 3,
-    slug: 'nodejs-api-architecture',
-    thumbClass: 'bg-gradient-thumbnail-3',
-    thumbIcon: '🛠️',
-    level: 'Intermediate',
-    levelColor: 'blue',
-    title: 'Node.js API Architecture',
-    desc: 'Design and build scalable RESTful APIs with Node.js, Express and best practices for production deployments.',
-    hours: '7h 10m',
-    lessons: 26,
-    price: '₹999',
-    rating: 4.7,
-    students: 145,
-    bestseller: false,
-    certificate: true,
-    tags: ['Intermediate', 'Backend'],
-  },
-]
+// Mock data removed in favor of real API data
 
 const LEVELS = ['All Levels', 'Beginner', 'Intermediate', 'Advanced']
 
@@ -163,7 +106,7 @@ function CourseCard({ course }) {
             🏆 Best Seller
           </div>
         )}
-        <span className="text-[52px] drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5" aria-hidden="true">{course.thumbIcon}</span>
+        <span className="text-[52px] drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5" aria-hidden="true"><img src={course.thumbIcon} alt="thumnail" /></span>
       </div>
 
       <CardContent className="p-4 pt-4 flex flex-col gap-2 flex-1">
@@ -212,12 +155,53 @@ function CourseCard({ course }) {
    Courses Page — root export
 ───────────────────────────────────────────────────────── */
 export default function CoursesPage() {
+  const [courses, setCourses] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
   const [query,       setQuery]       = useState('')
   const [activeLevel, setActiveLevel] = useState('All Levels')
   const [sortBy,      setSortBy]      = useState('popular')
 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await getAllcourses()
+        console.log(data);
+        
+        // Map backend data to UI format
+        const formatted = data.courses.map(c => ({
+          id: c?.id,
+          slug: c?.slug,
+          thumbClass: c?.accent || 'bg-gradient-thumbnail',
+          thumbIcon: c?.thumbnail || '🎓', 
+          level: c?.level,
+          levelColor: c?.level.toLowerCase().includes('beginner') ? 'green' : 'blue',
+          title: c?.title,
+          desc: c?.short_description || c?.description,
+          hours: `${Math.floor(c?.duration / 60)}h ${c?.duration % 60}m`,
+          lessons: c?._count?.modules || 0, 
+          price: `₹${c?.price}`,
+          rating: c?.rating || 4.5,
+          students: c?.students || 0,
+          bestseller: c?.bestseller || false,
+          certificate: true,
+          tags: [c?.level, c?.category].filter(Boolean),
+        }))
+        setCourses(formatted)
+      } catch (err) {
+        console.error(err)
+        setError('Failed to load courses')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCourses()
+  }, [])
+
   const filtered = useMemo(() => {
-    let list = [...COURSES]
+    let list = [...courses]
 
     /* search */
     if (query.trim()) {
@@ -235,13 +219,13 @@ export default function CoursesPage() {
     }
 
     /* sort */
-    if (sortBy === 'price-asc') list.sort((a, b) => parseInt(a.price.slice(1)) - parseInt(b.price.slice(1)))
-    if (sortBy === 'price-desc') list.sort((a, b) => parseInt(b.price.slice(1)) - parseInt(a.price.slice(1)))
+    if (sortBy === 'price-asc') list.sort((a, b) => parseInt(a.price.replace(/[^0-9]/g, '')) - parseInt(b.price.replace(/[^0-9]/g, '')))
+    if (sortBy === 'price-desc') list.sort((a, b) => parseInt(b.price.replace(/[^0-9]/g, '')) - parseInt(a.price.replace(/[^0-9]/g, '')))
     if (sortBy === 'rating')  list.sort((a, b) => b.rating  - a.rating)
     if (sortBy === 'popular') list.sort((a, b) => b.students - a.students)
 
     return list
-  }, [query, activeLevel, sortBy])
+  }, [query, activeLevel, sortBy, courses])
 
   return (
     <>
@@ -326,7 +310,17 @@ export default function CoursesPage() {
         {/* ── Course grid ─────────────────────────── */}
         <section className="py-8 pb-16">
           <div className="max-w-[1200px] mx-auto px-6">
-            {filtered.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-20 px-6 flex flex-col items-center gap-2.5">
+                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-gray-500 font-medium">Loading courses...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-20 px-6 flex flex-col items-center gap-2.5">
+                <p className="text-red-500 font-medium">{error}</p>
+                <Button variant="secondary" onClick={() => window.location.reload()}>Try Again</Button>
+              </div>
+            ) : filtered.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" role="list" aria-label="Course listings">
                 {filtered.map((course) => (
                   <div key={course.id} role="listitem">
