@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import {login,me} from "../services/auth.serivces.js"
+import { login, me, logout, signup } from "../services/auth.serivces.js";
 
 const AuthContext = createContext();
 
@@ -17,6 +17,11 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       const response = await login(data);
+      if (response.user) {
+        setUser(response.user);
+      } else {
+        await fetchUser();
+      }
       return response;
     } catch (err) {
       setError(err);
@@ -26,15 +31,36 @@ export const AuthProvider = ({ children }) => {
     }
   } 
 
+  async function signupUser(data) {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await signup(data);
+      if (response.user) {
+        setUser(response.user);
+      } else {
+        await fetchUser();
+      }
+      return response;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const fetchUser = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await me();
-      setUser(response);
+      setUser(response.user || response);
     }catch (error) {
       setError(error);
-      console.error("Error fetching user:", error);
+      if (error.response && error.response.status !== 401) {
+        console.error("Error fetching user:", error);
+      }
     } finally {
       setLoading(false);
     }
@@ -43,6 +69,16 @@ export const AuthProvider = ({ children }) => {
     fetchUser();
   }, []);
 
+  const logoutUser = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUser(null);
+    }
+  };
+
   const value = {
     user,
     setUser,
@@ -50,7 +86,9 @@ export const AuthProvider = ({ children }) => {
     setLoading,
     error,
     setError,
-    loginUser
+    loginUser,
+    logoutUser,
+    signupUser
   };
 
   return (

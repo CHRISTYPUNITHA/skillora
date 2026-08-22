@@ -42,12 +42,20 @@ export default function LoginPage() {
     const errs = validate(form.email, form.password)
     if (Object.keys(errs).length) { setErrors(errs); return }
 
-    setLoading(true)
-    /* Simulate API call */
-    await new Promise((r) => setTimeout(r, 1400))
-    setLoading(false)
-    showToast('✅', 'Signed in! Taking you to courses…')
-    setTimeout(() => navigate('/courses'), 1000)
+    try {
+      setLoading(true)
+      const res = await loginUser(form)
+      if (res && res.success !== false) {
+        showToast('✅', 'Signed in! Taking you to courses…')
+        setTimeout(() => navigate('/courses'), 1000)
+      } else {
+        showToast('❌', res.message || 'Failed to sign in')
+        setLoading(false)
+      }
+    } catch (err) {
+      showToast('❌', err.response?.data?.message || 'Failed to sign in')
+      setLoading(false)
+    }
   }
 
   return (
@@ -197,37 +205,6 @@ export default function LoginPage() {
               <>Sign In →</>
             )}
           </button>
-
-          {/* Divider */}
-          {/* <div className="flex items-center gap-3 my-1">
-            <div className="flex-1 h-px bg-gray-100" />
-            <span className="text-[12px] font-medium text-gray-400 whitespace-nowrap">or continue with</span>
-            <div className="flex-1 h-px bg-gray-100" />
-          </div> */}
-
-          {/* Social buttons */}
-          {/* <div className="flex flex-col sm:flex-row gap-2.5">
-            <button
-              type="button"
-              className="flex-1 h-[42px] flex items-center justify-center gap-[9px] text-[13px] font-semibold text-gray-700 bg-gray-25 border-[1.5px] border-gray-200 rounded-[11px] cursor-pointer transition-all duration-200 hover:bg-white hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(10,8,30,0.07)] hover:-translate-y-[1px]"
-              id="btn-google-login"
-              onClick={() => showToast('🔗', 'Google OAuth coming soon!')}
-              aria-label="Continue with Google"
-            >
-              <span className="text-[17px] leading-none" aria-hidden="true">G</span>
-              Google
-            </button>
-            <button
-              type="button"
-              className="flex-1 h-[42px] flex items-center justify-center gap-[9px] text-[13px] font-semibold text-gray-700 bg-gray-25 border-[1.5px] border-gray-200 rounded-[11px] cursor-pointer transition-all duration-200 hover:bg-white hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(10,8,30,0.07)] hover:-translate-y-[1px]"
-              id="btn-github-login"
-              onClick={() => showToast('🔗', 'GitHub OAuth coming soon!')}
-              aria-label="Continue with GitHub"
-            >
-              <span className="text-[17px] leading-none" aria-hidden="true">⌥</span>
-              GitHub
-            </button>
-          </div> */}
         </form>
 
         {/* Footer */}

@@ -265,9 +265,6 @@ export default function CheckoutPage() {
                 <ShieldCheck className="w-4 h-4 text-green-600" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-700">
-                  30-Day Money Back Guarantee
-                </p>
                 <p className="text-xs text-gray-400 mt-0.5">
                   Not satisfied? Get a full refund, no questions asked.
                 </p>

@@ -219,8 +219,8 @@ function PriceCard({ course }) {
         >
           Enroll Now
         </Button>
-        <p className="text-center text-[11.5px] text-gray-400 font-medium mb-6">30-Day Money-Back Guarantee</p>
-
+        
+        
         <div className="flex flex-col gap-3 pt-6 border-t border-gray-100">
           <p className="text-[13px] font-bold text-gray-900 mb-1">This course includes:</p>
           {course.includes.map((item) => (
@@ -346,8 +346,8 @@ export default function CourseDetailPage() {
 
   return (
     <>
-      <title>{course.title} — Skillora</title>
-      <meta name="description" content={course.desc} />
+      
+     
 
       <LightNavbar />
 

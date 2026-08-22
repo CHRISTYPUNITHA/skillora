@@ -27,7 +27,19 @@ export const me = async () => {
         return response.data;
     }
     catch (error) {
-        console.error("Error fetching user:", error);
+        if (error.response && error.response.status !== 401) {
+            console.error("Error fetching user:", error);
+        }
+        throw error;
+    }
+}
+
+export const logout = async () => {
+    try {
+        const response = await api.post("/auth/logout");
+        return response.data;
+    } catch (error) {
+        console.error("Error during logout:", error);
         throw error;
     }
 }

@@ -4,7 +4,8 @@
  * Left: dark brand panel with animated orbs + course previews + testimonial
  * Right: white form card (injected via children)
  */
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 
 /* Course preview data for the left panel */
 const PREVIEW_COURSES = [
@@ -28,8 +29,7 @@ export default function AuthLayout({ children }) {
 
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 relative z-10" aria-label="Skillora home">
-          <div className="w-9 h-9 bg-gradient-to-br from-[#7C5CFC] to-[#5A3DE8] rounded-xl flex items-center justify-center text-[17px] shadow-[0_4px_14px_rgba(124,92,252,0.40)]">⚡</div>
-          <span className="text-[19px] font-bold text-white tracking-[-0.02em]">Skillora</span>
+          <img src="/logo_skillora.png" alt="Skillora Logo" className="h-12 w-auto object-contain" />
         </Link>
 
         {/* Center — tagline + course previews */}
@@ -92,6 +92,13 @@ export default function AuthLayout({ children }) {
 
       {/* ── Right Form Panel ─────────────────────────────── */}
       <main className="flex items-center justify-center px-5 py-8 md:px-10 md:py-12 bg-gray-50 relative min-h-screen md:min-h-0 before:absolute before:inset-0 before:bg-[radial-gradient(circle,rgba(124,92,252,0.07)_1px,transparent_1px)] before:bg-[size:28px_28px] before:pointer-events-none">
+        <Link 
+          to="/" 
+          className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 hover:text-purple-600 transition-colors z-20"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </Link>
         {children}
       </main>
     </div>
