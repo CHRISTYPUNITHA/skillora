@@ -18,7 +18,47 @@ export { Prisma }
 export * as $Enums from './enums.ts'
 export * from './enums.ts';
 /**
- * Model User
+ * Model user
  * 
  */
-export type User = Prisma.UserModel
+export type user = Prisma.userModel
+/**
+ * Model course
+ * 
+ */
+export type course = Prisma.courseModel
+/**
+ * Model course_module
+ * 
+ */
+export type course_module = Prisma.course_moduleModel
+/**
+ * Model lesson
+ * 
+ */
+export type lesson = Prisma.lessonModel
+/**
+ * Model order
+ * 
+ */
+export type order = Prisma.orderModel
+/**
+ * Model payment
+ * 
+ */
+export type payment = Prisma.paymentModel
+/**
+ * Model enrollment
+ * 
+ */
+export type enrollment = Prisma.enrollmentModel
+/**
+ * Model lesson_progress
+ * 
+ */
+export type lesson_progress = Prisma.lesson_progressModel
+/**
+ * Model review
+ * 
+ */
+export type review = Prisma.reviewModel

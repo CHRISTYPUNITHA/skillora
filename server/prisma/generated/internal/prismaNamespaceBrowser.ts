@@ -51,7 +51,15 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  User: 'User'
+  user: 'user',
+  course: 'course',
+  course_module: 'course_module',
+  lesson: 'lesson',
+  order: 'order',
+  payment: 'payment',
+  enrollment: 'enrollment',
+  lesson_progress: 'lesson_progress',
+  review: 'review'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -74,7 +82,7 @@ export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
   email: 'email',
-  passwordHash: 'passwordHash',
+  password: 'password',
   role: 'role',
   avatar: 'avatar',
   createdAt: 'createdAt',
@@ -82,6 +90,126 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const CourseScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  short_description: 'short_description',
+  description: 'description',
+  category: 'category',
+  level: 'level',
+  duration: 'duration',
+  price: 'price',
+  thumbnail: 'thumbnail',
+  accent: 'accent',
+  isPublished: 'isPublished',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CourseScalarFieldEnum = (typeof CourseScalarFieldEnum)[keyof typeof CourseScalarFieldEnum]
+
+
+export const Course_moduleScalarFieldEnum = {
+  id: 'id',
+  course_id: 'course_id',
+  title: 'title',
+  description: 'description',
+  position: 'position',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type Course_moduleScalarFieldEnum = (typeof Course_moduleScalarFieldEnum)[keyof typeof Course_moduleScalarFieldEnum]
+
+
+export const LessonScalarFieldEnum = {
+  id: 'id',
+  module_id: 'module_id',
+  title: 'title',
+  description: 'description',
+  video_url: 'video_url',
+  duration: 'duration',
+  position: 'position',
+  isPreview: 'isPreview',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonScalarFieldEnum = (typeof LessonScalarFieldEnum)[keyof typeof LessonScalarFieldEnum]
+
+
+export const OrderScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  course_id: 'course_id',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  razorpay_order_id: 'razorpay_order_id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const PaymentScalarFieldEnum = {
+  id: 'id',
+  order_id: 'order_id',
+  razorpay_payment_id: 'razorpay_payment_id',
+  razorpay_signature: 'razorpay_signature',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  method: 'method',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const EnrollmentScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  course_id: 'course_id',
+  status: 'status',
+  progressPercent: 'progressPercent',
+  enrolledAt: 'enrolledAt',
+  completedAt: 'completedAt'
+} as const
+
+export type EnrollmentScalarFieldEnum = (typeof EnrollmentScalarFieldEnum)[keyof typeof EnrollmentScalarFieldEnum]
+
+
+export const Lesson_progressScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  lesson_id: 'lesson_id',
+  completed: 'completed',
+  watched_seconds: 'watched_seconds',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type Lesson_progressScalarFieldEnum = (typeof Lesson_progressScalarFieldEnum)[keyof typeof Lesson_progressScalarFieldEnum]
+
+
+export const ReviewScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  course_id: 'course_id',
+  rating: 'rating',
+  comment: 'comment',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
 
 
 export const SortOrder = {
