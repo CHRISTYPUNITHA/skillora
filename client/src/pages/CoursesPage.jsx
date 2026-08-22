@@ -1,6 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { getAllcourses } from '../services/courses.services.js'
+import { useState, useMemo } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, Bell, Clock, BookOpen, Award } from 'lucide-react'
 import { Button } from '../component/ui/Button'
 import { Input } from '../component/ui/Input'
@@ -19,6 +18,21 @@ const LEVELS = ['All Levels', 'Beginner', 'Intermediate', 'Advanced']
 ───────────────────────────────────────────────────────── */
 export function LightNavbar() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const currentPath = location.pathname
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  
+  // Mock logged in user data
+  const user = {
+    name: "Rahul Mehta",
+    email: "rahul@example.com",
+    initials: "R"
+  }
+  
+  const handleLogout = () => {
+    // Navigate back to login
+    navigate('/login')
+  }
 
   return (
     <nav className="sticky top-0 z-50 h-16 bg-white border-b border-gray-200 flex items-center shadow-[0_1px_4px_rgba(20,20,43,0.05)]" aria-label="App navigation">
@@ -30,19 +44,17 @@ export function LightNavbar() {
 
         <ul className="flex items-center gap-0.5 flex-1 m-0 p-0 list-none" role="list">
           {[
-            { label: 'Home',        to: '/' },
             { label: 'Courses',     to: '/courses' },
-            { label: 'Dashboard',   to: '/dashboard' },
             { label: 'My Learning', to: '/my-learning' },
           ].map(({ label, to }) => (
             <li key={label}>
               <Link
                 to={to}
-                className={`relative px-3.5 py-1.5 text-[13.5px] font-medium rounded-lg transition-colors no-underline ${to === '/courses' ? 'text-purple-600 font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
-                aria-current={to === '/courses' ? 'page' : undefined}
+                className={`relative px-3.5 py-1.5 text-[13.5px] font-medium rounded-lg transition-colors no-underline ${currentPath === to ? 'text-purple-600 font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+                aria-current={currentPath === to ? 'page' : undefined}
               >
                 {label}
-                {to === '/courses' && (
+                {currentPath === to && (
                   <div className="absolute -bottom-[2px] left-3.5 right-3.5 h-0.5 bg-purple-500 rounded-sm" />
                 )}
               </Link>
@@ -50,18 +62,35 @@ export function LightNavbar() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2 ml-auto relative">
           <Button variant="ghost" size="icon" className="w-9 h-9 rounded-[10px] text-gray-500 hover:bg-gray-100 hover:text-gray-800" aria-label="Notifications">
             <Bell size={18} />
           </Button>
+          
           <button
             className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#5A3DE8] text-white text-sm font-bold flex items-center justify-center cursor-pointer border-2 border-purple-500/25 transition-shadow hover:shadow-[0_0_0_3px_rgba(124,92,252,0.18)]"
             aria-label="User profile"
             type="button"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
           >
-            R
+            {user.initials}
           </button>
+
+          {/* Profile Dropdown */}
+          {isProfileOpen && (
+            <div className="absolute right-0 top-12 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
+                <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+              </div>
+              <button
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 font-medium"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

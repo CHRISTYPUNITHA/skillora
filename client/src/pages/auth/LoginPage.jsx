@@ -38,28 +38,16 @@ export default function LoginPage() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const errs = validate(form.email, form.password);
-      if (Object.keys(errs).length) {
-        setErrors(errs);
-        return;
-      }
-      const res = await loginUser(form);
-      
-      if (res?.success) {
-        showToast("✅", "Signed in! Taking you to your dashboard…");
-        setTimeout(() => navigate('/dashboard'), 1000);
-      } else {
-        showToast("❌", "Login failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error during login:", error);
-      showToast("❌", "Login failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    e.preventDefault()
+    const errs = validate(form.email, form.password)
+    if (Object.keys(errs).length) { setErrors(errs); return }
+
+    setLoading(true)
+    /* Simulate API call */
+    await new Promise((r) => setTimeout(r, 1400))
+    setLoading(false)
+    showToast('✅', 'Signed in! Taking you to courses…')
+    setTimeout(() => navigate('/courses'), 1000)
   }
 
   return (
