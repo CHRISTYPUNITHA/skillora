@@ -1,5 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { getAllcourses } from '../services/courses.services'
+import { useAuth } from '../context/AuthContext'
 import { Search, Bell, Clock, BookOpen, Award } from 'lucide-react'
 import { Button } from '../component/ui/Button'
 import { Input } from '../component/ui/Input'
@@ -21,16 +23,10 @@ export function LightNavbar() {
   const location = useLocation()
   const currentPath = location.pathname
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const { user, logoutUser } = useAuth()
   
-  // Mock logged in user data
-  const user = {
-    name: "Rahul Mehta",
-    email: "rahul@example.com",
-    initials: "R"
-  }
-  
-  const handleLogout = () => {
-    // Navigate back to login
+  const handleLogout = async () => {
+    await logoutUser()
     navigate('/login')
   }
 
@@ -38,8 +34,7 @@ export function LightNavbar() {
     <nav className="sticky top-0 z-50 h-16 bg-white border-b border-gray-200 flex items-center shadow-[0_1px_4px_rgba(20,20,43,0.05)]" aria-label="App navigation">
       <div className="max-w-[1200px] mx-auto w-full px-6 flex items-center gap-8">
         <Link to="/" className="flex items-center gap-2 text-[17px] font-bold text-gray-900 tracking-[-0.02em] shrink-0 no-underline" aria-label="Skillora home">
-          <div className="text-xl">⚡</div>
-          <span>Skillora</span>
+          <img src="/logo_skillora.png" alt="Skillora Logo" className="h-10 w-auto object-contain" />
         </Link>
 
         <ul className="flex items-center gap-0.5 flex-1 m-0 p-0 list-none" role="list">
@@ -67,29 +62,37 @@ export function LightNavbar() {
             <Bell size={18} />
           </Button>
           
-          <button
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#5A3DE8] text-white text-sm font-bold flex items-center justify-center cursor-pointer border-2 border-purple-500/25 transition-shadow hover:shadow-[0_0_0_3px_rgba(124,92,252,0.18)]"
-            aria-label="User profile"
-            type="button"
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-          >
-            {user.initials}
-          </button>
-
-          {/* Profile Dropdown */}
-          {isProfileOpen && (
-            <div className="absolute right-0 top-12 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-              <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
-              </div>
+          {user ? (
+            <>
               <button
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 font-medium"
-                onClick={handleLogout}
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#5A3DE8] text-white text-sm font-bold flex items-center justify-center cursor-pointer border-2 border-purple-500/25 transition-shadow hover:shadow-[0_0_0_3px_rgba(124,92,252,0.18)]"
+                aria-label="User profile"
+                type="button"
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
-                Logout
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </button>
-            </div>
+
+              {/* Profile Dropdown */}
+              {isProfileOpen && (
+                <div className="absolute right-0 top-12 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                  <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{user.name || 'User'}</p>
+                    <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+                  </div>
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 font-medium"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 ml-2">
+              Login
+            </Link>
           )}
         </div>
       </div>
@@ -258,7 +261,7 @@ export default function CoursesPage() {
 
   return (
     <>
-      <title>Explore Courses — Skillora</title>
+  
       <meta name="description" content="Browse all Skillora developer courses. Filter by level, search by topic and start your learning journey today." />
 
       <LightNavbar />
