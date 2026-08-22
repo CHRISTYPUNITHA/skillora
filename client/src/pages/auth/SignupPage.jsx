@@ -1,19 +1,13 @@
-/**
- * SignupPage.jsx
- * "Create Account 🚀" — Full name + Email + Password form,
- * terms checkbox, social auth, link back to Login
- */
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from './AuthLayout'
-import api from '../../utils/api.js'
+import {signup} from '../../services/auth.serivces.js'
 
-/* Password visibility toggle icon */
 function EyeIcon({ open }) {
   return open ? '🙈' : '👁️'
 }
 
-/* Compute password strength: 0=empty, 1=weak, 2=medium, 3=strong */
 function getPasswordStrength(pwd) {
   if (!pwd) return 0
   let score = 0
@@ -26,7 +20,7 @@ function getPasswordStrength(pwd) {
 const STRENGTH_LABELS = ['', 'Weak', 'Medium', 'Strong']
 const STRENGTH_COLORS = ['', 'weak', 'medium', 'strong']
 
-/* Simple inline validation */
+
 function validate(name, email, password, agreed) {
   const errors = {}
   if (!name.trim())                      errors.name     = 'Full name is required.'
@@ -50,30 +44,28 @@ export default function SignupPage() {
 
   const pwdStrength = getPasswordStrength(form.password)
 
-  /* Update field + clear error */
+
   function handleChange(e) {
     const { name, value } = e.target
     setForm((f) => ({ ...f, [name]: value }))
     if (errors[name]) setErrors((er) => ({ ...er, [name]: null }))
   }
 
-  /* Show temp toast */
+
   function showToast(icon, msg) {
     setToast({ icon, msg })
     setTimeout(() => setToast(null), 3200)
   }
 
-  /* Submit handler (mocked) */
+
   async function handleSubmit(e) {
     try{
+      setLoading(true)
       e.preventDefault()
       const errs = validate(form.name, form.email, form.password, agreed)
       if (Object.keys(errs).length) { setErrors(errs); return }
-      setLoading(true)
-      await new Promise((r) => setTimeout(r, 1600))
-
-      const res = await api.post("/auth/register", form)
-      if(res.status){
+      const res = await signup(form)
+      if(res.success){
         showToast('🎉', 'Account created! Welcome to Skillora 🚀')
         setTimeout(() => navigate('/courses'), 1000)
       }
@@ -112,6 +104,7 @@ export default function SignupPage() {
                 className={`w-full h-11 pl-[42px] pr-3.5 text-[13.5px] text-gray-900 bg-gray-25 border-[1.5px] rounded-xl outline-none transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:border-purple-500 focus:bg-white focus:shadow-[0_0_0_3.5px_rgba(124,92,252,0.12)] ${errors.name ? 'border-red-400 shadow-[0_0_0_3.5px_rgba(248,113,113,0.10)]' : 'border-gray-200'}`}
                 aria-describedby={errors.name ? 'signup-name-error' : undefined}
                 aria-invalid={!!errors.name}
+                required
               />
             </div>
             {errors.name && (
@@ -137,6 +130,7 @@ export default function SignupPage() {
                 className={`w-full h-11 pl-[42px] pr-3.5 text-[13.5px] text-gray-900 bg-gray-25 border-[1.5px] rounded-xl outline-none transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:border-purple-500 focus:bg-white focus:shadow-[0_0_0_3.5px_rgba(124,92,252,0.12)] ${errors.email ? 'border-red-400 shadow-[0_0_0_3.5px_rgba(248,113,113,0.10)]' : 'border-gray-200'}`}
                 aria-describedby={errors.email ? 'signup-email-error' : undefined}
                 aria-invalid={!!errors.email}
+                required
               />
             </div>
             {errors.email && (
@@ -162,6 +156,7 @@ export default function SignupPage() {
                 className={`w-full h-11 pl-[42px] pr-3.5 text-[13.5px] text-gray-900 bg-gray-25 border-[1.5px] rounded-xl outline-none transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:border-purple-500 focus:bg-white focus:shadow-[0_0_0_3.5px_rgba(124,92,252,0.12)] ${errors.password ? 'border-red-400 shadow-[0_0_0_3.5px_rgba(248,113,113,0.10)]' : 'border-gray-200'}`}
                 aria-describedby="signup-pwd-strength signup-pwd-error"
                 aria-invalid={!!errors.password}
+                required
               />
               <button
                 type="button"

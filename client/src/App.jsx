@@ -14,7 +14,7 @@
  */
 import { Routes, Route, Navigate } from 'react-router-dom'
 
-/* Pages */
+
 import LandingPage      from './pages/LandingPage'
 import CoursesPage      from './pages/CoursesPage'
 import CourseDetailPage from './pages/CourseDetailPage'
@@ -26,6 +26,15 @@ import MyLearningPage   from './pages/MyLearningPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 
 export default function App() {
+  const { user } = useAuth();
+  const location = useLocation();
+  console.log(user);
+  
+
+  if (user && ['/', '/login', '/signup'].includes(location.pathname)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <Routes>
       <Route path="/"                 element={<LandingPage />}      />
