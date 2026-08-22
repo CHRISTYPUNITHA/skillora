@@ -90,7 +90,7 @@ const TESTIMONIALS = [
 
 const NAV_LINKS = [
   { label: 'Home',    href: '#home' },
-  { label: 'Courses', href: '/courses' },
+  { label: 'Courses', href: '#courses' },
   { label: 'About',   href: '#about' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Contact', href: '#contact' },

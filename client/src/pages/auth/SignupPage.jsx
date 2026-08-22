@@ -75,7 +75,7 @@ export default function SignupPage() {
       const res = await api.post("/auth/register", form)
       if(res.status){
         showToast('🎉', 'Account created! Welcome to Skillora 🚀')
-        setTimeout(() => navigate('/dashboard'), 1000)
+        setTimeout(() => navigate('/courses'), 1000)
       }
     }
     catch(error){

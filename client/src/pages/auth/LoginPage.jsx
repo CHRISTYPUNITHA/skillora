@@ -53,8 +53,8 @@ export default function LoginPage() {
     /* Simulate API call */
     await new Promise((r) => setTimeout(r, 1400))
     setLoading(false)
-    showToast('✅', 'Signed in! Taking you to your dashboard…')
-    setTimeout(() => navigate('/dashboard'), 1000)
+    showToast('✅', 'Signed in! Taking you to courses…')
+    setTimeout(() => navigate('/courses'), 1000)
   }
 
   return (
