@@ -24,6 +24,8 @@ import DashboardPage    from './pages/dashboard/DashboardPage'
 import CheckoutPage     from './pages/CheckoutPage'
 import MyLearningPage   from './pages/MyLearningPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
+import {useAuth} from "./context/AuthContext"
+import { useLocation } from 'react-router-dom'
 
 export default function App() {
   const { user } = useAuth();
