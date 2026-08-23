@@ -5,51 +5,12 @@
  */
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getAllCourses } from '../services/courses.services'
 import '../App.css'
 /* ─────────────────────────────────────────────────────────
    Data
 ───────────────────────────────────────────────────────── */
-const COURSES = [
-  {
-    id: 1,
-    slug: 'full-stack-foundations',
-    thumb: '🚀',
-    thumbClass: 'bg-gradient-thumbnail',
-    level: 'Beginner → Intermediate',
-    title: 'Full-Stack Foundations',
-    desc: 'Build production-ready full-stack applications from scratch with React, Node.js, Express and PostgreSQL.',
-    hours: '8h 20m',
-    lessons: 32,
-    price: '₹799',
-    bestseller: true,
-  },
-  {
-    id: 2,
-    slug: 'react-product-engineering',
-    thumb: '⚛️',
-    thumbClass: 'bg-gradient-thumbnail-2',
-    level: 'Intermediate',
-    title: 'React Product Engineering',
-    desc: 'Master advanced React patterns, state management, performance optimisation and testing.',
-    hours: '6h 40m',
-    lessons: 28,
-    price: '₹999',
-    bestseller: false,
-  },
-  {
-    id: 3,
-    slug: 'nodejs-api-architecture',
-    thumb: '🛠️',
-    thumbClass: 'bg-gradient-thumbnail-3',
-    level: 'Intermediate',
-    title: 'Node.js API Architecture',
-    desc: 'Design and build scalable RESTful APIs with Node.js, Express and best practices.',
-    hours: '7h 10m',
-    lessons: 26,
-    price: '₹999',
-    bestseller: false,
-  },
-]
+/* Static COURSES removed in favor of real API data */
 
 const FEATURES = [
   { icon: '🏗️', color: 'purple', title: 'Learn by Building', desc: 'Hands-on projects and practical examples in every course. No fluff, just real-world code.' },
@@ -348,6 +309,57 @@ function FeaturesSection() {
 function CoursesSection() {
   const tabs = ['All Levels', 'Beginner', 'Intermediate', 'Advanced']
   const [activeTab, setActiveTab] = useState('All Levels')
+  const [courses, setCourses] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true)
+        const data = await getAllCourses()
+        // Map backend data to UI format
+        const formatted = data?.courses.map(c => ({
+          id: c?.id,
+          slug: c?.slug,
+          thumb: c?.thumbnail || '🎓',
+          thumbClass: c?.accent || 'bg-gradient-thumbnail',
+          level: c?.level || 'All Levels',
+          title: c?.title,
+          desc: c?.short_description || c?.description,
+          hours: `${Math.floor((c?.duration || 0) / 60)}h ${(c?.duration || 0) % 60}m`,
+          lessons: c?.modules?.reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 0,
+          price: `₹${c?.price}`,
+          bestseller: c?.bestseller || false,
+        }))
+        setCourses(formatted)
+      } catch (err) {
+        console.error('Failed to load courses', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchCourses()
+  }, [])
+
+  const filteredCourses = courses.filter((c) => {
+    if (activeTab === 'All Levels') return true
+    return c.level?.toLowerCase().includes(activeTab.toLowerCase())
+  })
+  console.log(filteredCourses)
+
+  useEffect(() => {
+    if (!loading && filteredCourses.length > 0) {
+      const els = document.querySelectorAll('.courses-grid .fade-up')
+      const io = new IntersectionObserver(
+        (entries) => entries.forEach((e) => {
+          if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target) }
+        }),
+        { threshold: 0.14 }
+      )
+      els.forEach((el) => io.observe(el))
+      return () => io.disconnect()
+    }
+  }, [loading, filteredCourses])
 
   return (
     <section className="section courses-section" id="courses" role="region" aria-labelledby="courses-heading">
@@ -373,42 +385,58 @@ function CoursesSection() {
           </div>
         </div>
 
-        <div className="courses-grid" role="list" aria-label="Course listings">
-          {COURSES.map((course, i) => (
-            <div
-              key={course.id}
-              className={`course-card fade-up fade-up-delay-${i + 1}`}
-              role="listitem" tabIndex={0}
-              aria-label={`Course: ${course.title}`}
-            >
-              <div className={`course-card__thumb ${course.thumbClass}`}>
-                {course.bestseller && <div className="course-card__bestseller">Best Seller</div>}
-                <span className="course-card__thumb-icon" aria-hidden="true">{course.thumb}</span>
-              </div>
-              <div className="course-card__body">
-                <div className="course-card__level">{course.level}</div>
-                <h3 className="course-card__title">{course.title}</h3>
-                <p className="course-card__desc">{course.desc}</p>
-                <div className="course-card__meta">
-                  <span className="course-meta-item"><span aria-hidden="true">⏱</span>{course.hours}</span>
-                  <span className="course-meta-item"><span aria-hidden="true">📋</span>{course.lessons} Lessons</span>
-                  <span className="course-meta-item"><span aria-hidden="true">🎓</span>Certificate</span>
+        {loading ? (
+          <div className="flex justify-center items-center h-48">
+            <div className="text-gray-500">Loading courses...</div>
+          </div>
+        ) : (
+          <div className="courses-grid" role="list" aria-label="Course listings">
+            {filteredCourses.length > 0 ? (
+              filteredCourses.map((course, i) => (
+                <div
+                  key={course.id}
+                  className={`course-card fade-up fade-up-delay-${(i % 3) + 1}`}
+                  role="listitem" tabIndex={0}
+                  aria-label={`Course: ${course.title}`}
+                >
+                  <div className={`course-card__thumb ${course.thumbClass}`}>
+                    {course.bestseller && <div className="course-card__bestseller">Best Seller</div>}
+                    {course.thumb?.startsWith('http') || course.thumb?.startsWith('/') ? (
+                      <img src={course.thumb} alt="thumbnail" className="object-contain drop-shadow-lg" />
+                    ) : (
+                      <span className="course-card__thumb-icon" aria-hidden="true">{course.thumb}</span>
+                    )}
+                  </div>
+                  <div className="course-card__body">
+                    <div className="course-card__level">{course.level}</div>
+                    <h3 className="course-card__title">{course.title}</h3>
+                    <p className="course-card__desc line-clamp-3">{course.desc}</p>
+                    <div className="course-card__meta">
+                      <span className="course-meta-item"><span aria-hidden="true">⏱</span>{course.hours}</span>
+                      <span className="course-meta-item"><span aria-hidden="true">📋</span>{course.lessons} Lessons</span>
+                      <span className="course-meta-item"><span aria-hidden="true">🎓</span>Certificate</span>
+                    </div>
+                    <div className="course-card__footer mt-auto">
+                      <div className="course-card__price">{course.price}<span>/ lifetime</span></div>
+                      <Link
+                        to={`/courses/${course.slug}`}
+                        className="btn-view-course"
+                        id={`btn-view-course-${course.id}`}
+                        aria-label={`View course: ${course.title}`}
+                      >
+                        View Course →
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-                <div className="course-card__footer">
-                  <div className="course-card__price">{course.price}<span>/ lifetime</span></div>
-                  <Link
-                    to={`/courses/${course.slug}`}
-                    className="btn-view-course"
-                    id={`btn-view-course-${course.id}`}
-                    aria-label={`View course: ${course.title}`}
-                  >
-                    View Course →
-                  </Link>
-                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-500 py-10">
+                No courses found for this level.
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </section>
   )

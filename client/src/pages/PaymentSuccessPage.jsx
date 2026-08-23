@@ -1,20 +1,4 @@
-/**
- * PaymentSuccessPage.jsx
- * Route: /payment-success
- *
- * Shown after a successful course purchase.
- * Layout matches the SMITIV_Layout.png reference:
- *   - Animated green success checkmark
- *   - Headline + subtext
- *   - Course receipt card (thumbnail · title · amount paid)
- *   - Order meta row (Order ID · Payment ID · Date)
- *   - Two CTAs: "Go to Dashboard" and "View My Courses"
- *
- * Styling: 100% Tailwind CSS v4 — no raw CSS / .css imports
- * Components: Button, Card, CardContent, Badge, Divider
- */
-
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import {
   CheckCircle2,
   BookOpen,
@@ -28,17 +12,6 @@ import { Button } from "../component/ui/Button"
 import { Badge }  from "../component/ui/Badge"
 import { Card, CardContent } from "../component/ui/Card"
 import { Divider } from "../component/ui/Divider"
-
-/* ─── Static / demo data ─────────────────────────────── */
-const PURCHASE = {
-  course:     "Full-Stack Foundations",
-  level:      "Beginner to Intermediate",
-  amountPaid: 799,
-  orderId:    "order_KJHB6T8Y2",
-  paymentId:  "pay_KJHB6T8Y2",
-  date:       "20 May 2025, 10:30 AM",
-  thumbnail:  "bg-gradient-to-br from-[#100D2E] to-[#6C4CF0]",
-}
 
 /* ─── Sub-components ──────────────────────────────────── */
 
@@ -93,7 +66,7 @@ function MetaItem({ icon: Icon, label, value }) {
         <span className="uppercase tracking-wide">{label}</span>
       </div>
       <p className="text-xs font-semibold text-gray-700 truncate max-w-[120px] text-center">
-        {value}
+        {value || "N/A"}
       </p>
     </div>
   )
@@ -101,8 +74,18 @@ function MetaItem({ icon: Icon, label, value }) {
 
 /* ─── Page ────────────────────────────────────────────── */
 export default function PaymentSuccessPage() {
-  const { course, level, amountPaid, orderId, paymentId, date, thumbnail } =
-    PURCHASE
+  const location = useLocation()
+  
+  // Default fallback values if navigated directly without state
+  const { 
+    course = "Course Enrolled", 
+    level = "Standard", 
+    amountPaid = 0, 
+    orderId = "N/A", 
+    paymentId = "N/A", 
+    date = new Date().toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }), 
+    thumbnail = "bg-gradient-to-br from-[#100D2E] to-[#6C4CF0]" 
+  } = location.state || {}
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex flex-col items-center justify-center px-4 py-12">

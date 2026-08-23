@@ -176,7 +176,17 @@ export default function CheckoutPage() {
               razorpay_signature: response?.razorpay_signature,
             })
             // 5. Navigate to success page
-            navigate("/payment-success")
+            navigate("/payment-success", {
+              state: {
+                course: course.title,
+                level: course.level || "Beginner to Intermediate",
+                amountPaid: course.price,
+                orderId: response?.razorpay_order_id,
+                paymentId: response?.razorpay_payment_id,
+                date: new Date().toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                thumbnail: "bg-gradient-to-br from-[#100D2E] to-[#6C4CF0]"
+              }
+            })
           } catch (verifyError) {
             console.error(verifyError)
             setError("Payment verification failed. Please contact support.")
