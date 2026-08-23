@@ -19,7 +19,7 @@ export const createOrder = async (req, res) => {
     // Fetch the course to get the price
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-    });
+    }); 
 
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });

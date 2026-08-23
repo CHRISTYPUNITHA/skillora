@@ -8,13 +8,15 @@ import SignupPage       from './pages/auth/SignupPage'
 import CheckoutPage     from './pages/CheckoutPage'
 import MyLearningPage   from './pages/MyLearningPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
+import LearnPage        from './pages/LearnPage'
 import { useAuth } from './context/AuthContext';
 
+
+import ProtectedRoute from './utils/ProtectedRoute';
 
 const AppLayout = () => {
   const { user } = useAuth();
   const location = useLocation();
-  console.log(user);
   
   if (user && ['/', '/login', '/signup'].includes(location.pathname)) {
     return <Navigate to="/courses" replace />;
@@ -32,9 +34,18 @@ const router = createBrowserRouter([
       { path: "/courses/:slug", element: <CourseDetailPage /> },
       { path: "/login", element: <LoginPage /> },
       { path: "/signup", element: <SignupPage /> },
-      { path: "/checkout/:courseId", element: <CheckoutPage /> },
-      { path: "/my-learning", element: <MyLearningPage /> },
-      { path: "/payment-success", element: <PaymentSuccessPage /> },
+      
+      // Protected routes
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: "/checkout/:courseId", element: <CheckoutPage /> },
+          { path: "/my-learning", element: <MyLearningPage /> },
+          { path: "/payment-success", element: <PaymentSuccessPage /> },
+          { path: "/learn/:slug", element: <LearnPage /> },
+        ]
+      },
+      
       { path: "*", element: <Navigate to="/" replace /> }
     ]
   }

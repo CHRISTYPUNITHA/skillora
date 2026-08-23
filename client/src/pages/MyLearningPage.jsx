@@ -1,25 +1,13 @@
-/**
- * MyLearningPage.jsx
- * Route: /my-learning
- *
- * Two-column learning dashboard:
- *   Left  — enrolled course cards with progress bars
- *   Right — circular overall-progress widget + stats
- *
- * Styling: 100% Tailwind CSS v4 — no raw CSS / .css imports
- * Components: Button, Card, CardContent, Badge, Tabs, ProgressBar, CircularProgress
- */
-
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
   BookOpen,
   Award,
   Clock,
-  LayoutDashboard,
   GraduationCap,
   PlayCircle,
   Flame,
-  Bell,
+  Loader2
 } from "lucide-react"
 import { Button } from "../component/ui/Button"
 import { Badge } from "../component/ui/Badge"
@@ -28,67 +16,14 @@ import { ProgressBar } from "../component/ui/ProgressBar"
 import { CircularProgress } from "../component/ui/CircularProgress"
 import { Divider } from "../component/ui/Divider"
 import { LightNavbar as TopNav } from "./CoursesPage"
-
-/* ─── Static data ─────────────────────────────────────── */
-const ENROLLED_COURSES = [
-  {
-    id: 1,
-    title: "Full-Stack Foundations",
-    level: "Beginner to Intermediate",
-    progress: 72,
-    lessonsCompleted: 23,
-    totalLessons: 32,
-    duration: "8h 20m",
-    thumbnail: "bg-gradient-to-br from-[#100D2E] to-[#6C4CF0]",
-    lastLesson: "Database Design and Prisma ORM",
-    slug: "full-stack-foundations",
-  },
-  {
-    id: 2,
-    title: "React Product Engineering",
-    level: "Intermediate",
-    progress: 35,
-    lessonsCompleted: 11,
-    totalLessons: 28,
-    duration: "6h 40m",
-    thumbnail: "bg-gradient-to-br from-[#0E3B2E] to-[#14B87F]",
-    lastLesson: "State Management with Zustand",
-    slug: "react-product-engineering",
-  },
-  {
-    id: 3,
-    title: "Node.js API Architecture",
-    level: "Intermediate",
-    progress: 10,
-    lessonsCompleted: 3,
-    totalLessons: 26,
-    duration: "7h 10m",
-    thumbnail: "bg-gradient-to-br from-[#2A1A00] to-[#E8A33D]",
-    lastLesson: "RESTful API Design Principles",
-    slug: "nodejs-api-architecture",
-  },
-]
-
-const STATS = [
-  { label: "Completed Lessons", value: 18, icon: BookOpen,        color: "text-purple-600", bg: "bg-purple-50" },
-  { label: "Total Lessons",     value: 34, icon: GraduationCap,   color: "text-blue-600",   bg: "bg-blue-50" },
-  { label: "Certificates",      value: 1,  icon: Award,           color: "text-amber-600",  bg: "bg-amber-50" },
-]
-
-const NAV_TABS = [
-  { label: "Courses",      href: "/courses" },
-  { label: "My Learning",  href: "/my-learning" },
-]
-
-const OVERALL_PROGRESS = 53
+import { getMyLearningCourses } from "../services/enrollment.services"
 
 /* ─── Sub-components ──────────────────────────────────── */
 
-/** Enrolled course card */
 function CourseCard({ course }) {
   const {
     title, level, progress, lessonsCompleted, totalLessons,
-    duration, thumbnail, lastLesson, slug,
+    duration, thumbnail, thumbClass, lastLesson, slug,
   } = course
 
   return (
@@ -98,9 +33,14 @@ function CourseCard({ course }) {
 
           {/* Thumbnail */}
           <div
-            className={`w-16 h-16 rounded-xl flex-shrink-0 flex items-center justify-center ${thumbnail} shadow-md`}
+            className={`w-16 h-16 rounded-xl flex-shrink-0 flex items-center justify-center ${thumbClass} shadow-md overflow-hidden relative bg-gray-900`}
           >
-            <PlayCircle className="w-7 h-7 text-white/90" />
+            {thumbnail?.startsWith('http') || thumbnail?.startsWith('/') ? (
+               <img src={thumbnail} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60" />
+            ) : (
+               <span className="text-3xl opacity-80 absolute">{thumbnail}</span>
+            )}
+            <PlayCircle className="w-7 h-7 text-white z-10 drop-shadow-md" />
           </div>
 
           {/* Info */}
@@ -112,13 +52,13 @@ function CourseCard({ course }) {
                 </h3>
                 <p className="text-xs text-gray-400 mt-0.5">{level}</p>
               </div>
-              <Link to={`/courses/${slug}`}>
+              <Link to={`/learn/${slug}`}>
                 <Button
                   id={`continue-${slug}`}
                   size="sm"
                   className="flex-shrink-0 text-xs bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-sm hover:scale-[1.02] transition-all"
                 >
-                  Continue
+                  {progress === 0 ? 'Start' : 'Continue'}
                 </Button>
               </Link>
             </div>
@@ -147,7 +87,6 @@ function CourseCard({ course }) {
   )
 }
 
-/** Stat pill in the right panel */
 function StatRow({ icon: Icon, label, value, color, bg }) {
   return (
     <div className="flex items-center justify-between py-3">
@@ -164,12 +103,45 @@ function StatRow({ icon: Icon, label, value, color, bg }) {
 
 /* ─── Page ────────────────────────────────────────────── */
 export default function MyLearningPage() {
+  const [courses, setCourses] = useState([])
+  const [stats, setStats] = useState({
+    completedLessons: 0,
+    totalLessons: 0,
+    certificates: 0,
+    overallProgress: 0
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getMyLearningCourses();
+        if (data.success) {
+          setCourses(data.courses);
+          setStats(data.stats);
+        }
+      } catch (err) {
+        setError("Failed to load your enrolled courses.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const STATS_DATA = [
+    { label: "Completed Lessons", value: stats.completedLessons, icon: BookOpen,        color: "text-purple-600", bg: "bg-purple-50" },
+    { label: "Total Lessons",     value: stats.totalLessons,     icon: GraduationCap,   color: "text-blue-600",   bg: "bg-blue-50" },
+    { label: "Certificates",      value: stats.certificates,     icon: Award,           color: "text-amber-600",  bg: "bg-amber-50" },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       <TopNav />
 
       <main className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-
+        
         {/* Page header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
@@ -178,92 +150,116 @@ export default function MyLearningPage() {
           <p className="text-sm text-gray-400 mt-1">Your enrolled courses</p>
         </div>
 
-        {/* Two-column grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
-
-          {/* ── LEFT — Course list ── */}
-          <div className="space-y-4">
-            {ENROLLED_COURSES.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-purple-600 animate-spin mb-4" />
+            <p className="text-gray-500 font-medium">Loading your courses...</p>
           </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-gray-100 shadow-sm">
+            <p className="text-red-500 font-medium mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-gray-100 shadow-sm text-center px-4">
+            <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4">
+              <BookOpen className="w-8 h-8 text-gray-400" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">No courses yet</h2>
+            <p className="text-gray-500 max-w-md mb-6 text-sm">
+              You haven't enrolled in any courses yet. Browse our catalog and start learning today!
+            </p>
+            <Link to="/courses">
+              <Button className="bg-purple-600 hover:bg-purple-700">Browse Courses</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+            
+            {/* ── LEFT — Course list ── */}
+            <div className="space-y-4">
+              {courses.map((course) => (
+                <CourseCard key={course.id} course={course} />
+              ))}
+            </div>
 
-          {/* ── RIGHT — Progress sidebar ── */}
-          <div className="space-y-4">
+            {/* ── RIGHT — Progress sidebar ── */}
+            <div className="space-y-4">
+              
+              {/* Overall progress card */}
+              <Card className="shadow-sm border-gray-100">
+                <CardContent className="p-6">
+                  <h2 className="text-sm font-semibold text-gray-700 mb-5">
+                    Learning Progress
+                  </h2>
 
-            {/* Overall progress card */}
-            <Card className="shadow-sm border-gray-100">
-              <CardContent className="p-6">
-                <h2 className="text-sm font-semibold text-gray-700 mb-5">
-                  Learning Progress
-                </h2>
+                  {/* Circular chart */}
+                  <div className="flex flex-col items-center py-2">
+                    <CircularProgress
+                      value={stats.overallProgress}
+                      size={140}
+                      stroke={12}
+                      trackColor="#EEF0F6"
+                      fillColor="#7C5CFC"
+                    >
+                      <span className="text-2xl font-extrabold text-gray-900">
+                        {stats.overallProgress}%
+                      </span>
+                      <span className="text-xs text-gray-400 mt-0.5">Overall</span>
+                    </CircularProgress>
+                    <p className="text-xs text-gray-400 mt-4 text-center">
+                      Keep going! You're doing great 🔥
+                    </p>
+                  </div>
 
-                {/* Circular chart */}
-                <div className="flex flex-col items-center py-2">
-                  <CircularProgress
-                    value={OVERALL_PROGRESS}
-                    size={140}
-                    stroke={12}
-                    trackColor="#EEF0F6"
-                    fillColor="#7C5CFC"
-                  >
-                    <span className="text-2xl font-extrabold text-gray-900">
-                      {OVERALL_PROGRESS}%
-                    </span>
-                    <span className="text-xs text-gray-400 mt-0.5">Overall</span>
-                  </CircularProgress>
-                  <p className="text-xs text-gray-400 mt-4 text-center">
-                    Keep going! You&apos;re doing great 🔥
-                  </p>
-                </div>
+                  <Divider className="my-4" />
 
-                <Divider className="my-4" />
+                  {/* Stats */}
+                  <div className="divide-y divide-gray-50">
+                    {STATS_DATA.map((stat) => (
+                      <StatRow key={stat.label} {...stat} />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
-                {/* Stats */}
-                <div className="divide-y divide-gray-50">
-                  {STATS.map((stat) => (
-                    <StatRow key={stat.label} {...stat} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+              {/* Current streak card */}
+              <Card className="shadow-sm border-gray-100 bg-gradient-to-br from-purple-600 to-purple-800 text-white">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <Flame className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-extrabold leading-none">12 days</p>
+                    <p className="text-xs text-purple-200 mt-0.5">Current Streak 🔥</p>
+                  </div>
+                  <div className="ml-auto">
+                    <Badge className="bg-white/10 text-white border-white/20 text-xs">
+                      Best: 20d
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Current streak card */}
-            <Card className="shadow-sm border-gray-100 bg-gradient-to-br from-purple-600 to-purple-800 text-white">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <Flame className="w-5 h-5 text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-lg font-extrabold leading-none">12 days</p>
-                  <p className="text-xs text-purple-200 mt-0.5">Current Streak 🔥</p>
-                </div>
-                <div className="ml-auto">
-                  <Badge className="bg-white/10 text-white border-white/20 text-xs">
-                    Best: 20d
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Certificates Label */}
-            <div
-              className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                  <Award className="w-4 h-4 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">
-                    My Certificates
-                  </p>
-                  <p className="text-xs text-gray-400">1 earned so far</p>
+              {/* Certificates Label */}
+              <div
+                className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                    <Award className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">
+                      My Certificates
+                    </p>
+                    <p className="text-xs text-gray-400">{stats.certificates} earned so far</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   )
