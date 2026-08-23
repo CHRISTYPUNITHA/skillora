@@ -19,6 +19,8 @@ import { Card, CardContent } from "../component/ui/Card"
 import { Divider } from "../component/ui/Divider"
 import { getCourseById } from "../services/courses.services"
 import { createOrder, verifyPayment } from "../services/payment.services"
+import {useAuth} from '../context/AuthContext'
+import { LightNavbar as TopNav } from "./CoursesPage"
 
 /* ─── Static data ─────────────────────────────────────── */
 const SECURITY_FEATURES = [
@@ -111,6 +113,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [paymentProcessing, setPaymentProcessing] = useState(false)
   const [error, setError] = useState("")
+  const {user} = useAuth()
 
   useEffect(() => {
     if (!courseId) {
@@ -168,9 +171,9 @@ export default function CheckoutPage() {
           try {
             // 4. Verify payment on backend
             await verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
+              razorpay_order_id: response?.razorpay_order_id,
+              razorpay_payment_id: response?.razorpay_payment_id,
+              razorpay_signature: response?.razorpay_signature,
             })
             // 5. Navigate to success page
             navigate("/payment-success")
@@ -180,8 +183,8 @@ export default function CheckoutPage() {
           }
         },
         prefill: {
-          name: "User",
-          email: "user@example.com",
+          name: user?.name,
+          email: user?.email,
         },
         theme: {
           color: "#6C4CF0",
@@ -222,8 +225,11 @@ export default function CheckoutPage() {
   const total = course.price - discount
 
   return (
+    <>
+    
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* ── Top navigation bar ── */}
+      <TopNav/>
       <nav className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
         <Link
           to={`/courses/${course.slug}`}
@@ -402,5 +408,6 @@ export default function CheckoutPage() {
         </div>
       </main>
     </div>
+    </>
   )
 }

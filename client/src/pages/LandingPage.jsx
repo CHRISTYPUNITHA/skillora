@@ -494,6 +494,27 @@ function Footer() {
     { heading: 'Courses', links: ['Full-Stack Foundations', 'React Product Engineering', 'Node.js API Architecture'] },
     { heading: 'Support', links: ['Help Center', 'Privacy Policy', 'Terms of Service'] },
   ]
+  const socialLinks = [
+    {
+      label: 'LinkedIn',
+      url: 'https://www.linkedin.com/in/christypunitha-y-62344b255',
+      icon: 'in'
+    },
+    {
+      label: 'GitHub',
+      url: 'https://github.com/CHRISTYPUNITHA/',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+      )
+    },
+    {
+      label: 'Portfolio',
+      url: 'https://christypunitha-dev.onrender.com/',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+      )
+    }
+  ]
   return (
     <footer className="footer" id="contact" role="contentinfo">
       <div className="footer-inner">
@@ -506,8 +527,17 @@ function Footer() {
               Practical courses for developers who want real-world skills and build amazing products.
             </p>
             <div className="footer-social" aria-label="Social media links">
-              {['𝕏', '▶', 'in', '💬'].map((icon, i) => (
-                <a key={i} href="#" className="footer-social-btn" id={`footer-social-${i}`} aria-label={`Social link ${i + 1}`}>{icon}</a>
+              {socialLinks.map((link) => (
+                <a 
+                  key={link.label} 
+                  href={link.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="footer-social-btn" 
+                  aria-label={link.label}
+                >
+                  {link.icon}
+                </a>
               ))}
             </div>
           </div>
@@ -523,8 +553,9 @@ function Footer() {
           ))}
         </div>
         <div className="footer-divider" aria-hidden="true" />
-        <div className="footer-bottom">
+        <div className="footer-bottom flex justify-between">
           <p className="footer-bottom__copy">© {new Date().getFullYear()} Skillora. All rights reserved.</p>
+          <p className="footer-bottom__copy">Developed ❤️ by CHRISTYPUNITHA Y</p>
         </div>
       </div>
     </footer>
