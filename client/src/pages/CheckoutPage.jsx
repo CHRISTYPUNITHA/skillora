@@ -32,7 +32,7 @@ const SECURITY_FEATURES = [
 const COURSE_INCLUDES = [
   { icon: Clock,    text: "Lifetime access" },
   { icon: BookOpen, text: "Self-paced learning" },
-  { icon: Clock,    text: "High-quality content" },
+  { icon: Zap,      text: "High-quality content" },
   { icon: Award,    text: "Certificate of completion" },
   { icon: CreditCard, text: "Access on mobile & TV" },
 ]

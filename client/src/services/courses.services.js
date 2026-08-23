@@ -1,7 +1,7 @@
 import api from "../utils/api";
 
 
-export const getAllcourses = async () =>{
+export const getAllCourses = async () => {
     try {
         const res = await api.get('/courses');
         return res.data;

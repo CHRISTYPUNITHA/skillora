@@ -116,7 +116,7 @@ export default function PaymentSuccessPage() {
           <BookOpen className="w-4 h-4 text-white" />
         </div>
         <span className="font-bold text-gray-900 text-sm tracking-tight">
-          CodeCraft
+          Skillora
         </span>
       </Link>
 

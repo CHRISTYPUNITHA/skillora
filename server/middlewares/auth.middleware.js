@@ -1,6 +1,6 @@
-import {verifyToken} from "../utils/jwt.token.js"
+import { verifyToken } from "../utils/jwt.token.js";
 
-export const authendicateToken = (req, res, next) => {
+export const authenticateToken = (req, res, next) => {
     try {
         const token = req.cookies.token;
         if (!token) {
