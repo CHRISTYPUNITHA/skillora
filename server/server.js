@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import courseRoutes from "./routes/course.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 import {prisma} from "./lib/prisma.js";
 import cookieParser from "cookie-parser";
 
@@ -17,6 +18,7 @@ app.use(cors({
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/courses", courseRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 
 const port = process.env.PORT || 3000;
 

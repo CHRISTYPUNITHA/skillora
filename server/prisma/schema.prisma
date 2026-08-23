@@ -38,6 +38,8 @@ model user {
   password String
   role         UserRole         @default(user)
   avatar       String?
+  title        String?
+  bio          String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
@@ -45,6 +47,7 @@ model user {
   enrollments  enrollment[]
   progress     lesson_progress[]
   reviews      review[]
+  coursesTaught course[]        @relation("InstructorCourses")
 
   @@index([email])
   @@map("users")
@@ -60,11 +63,19 @@ model course {
   level            String
   duration         Int              // duration in minutes
   price            Decimal          @db.Decimal(10, 2)
+  originalPrice    Decimal?         @db.Decimal(10, 2)
   thumbnail        String?
   accent           String?
+  bestseller       Boolean          @default(false)
+  certificate      Boolean          @default(true)
+  includes         String[]
+  whatYouLearn     String[]
   isPublished      Boolean          @default(false)
+  instructor_id    String?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+
+  instructor       user?            @relation("InstructorCourses", fields: [instructor_id], references: [id])
 
   modules          course_module[]
   orders           order[]

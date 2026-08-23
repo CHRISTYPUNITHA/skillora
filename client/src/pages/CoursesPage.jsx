@@ -10,7 +10,6 @@ import { Card, CardContent, CardFooter } from '../component/ui/Card'
 import { Badge } from '../component/ui/Badge'
 import { Tabs, TabsList, TabsTrigger } from '../component/ui/Tabs'
 import '../App.css'
-
 // Mock data removed in favor of real API data
 
 const LEVELS = ['All Levels', 'Beginner', 'Intermediate', 'Advanced']
@@ -138,7 +137,11 @@ function CourseCard({ course }) {
             🏆 Best Seller
           </div>
         )}
-        <span className="text-[52px] drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5" aria-hidden="true"><img src={course.thumbIcon} alt="thumnail" /></span>
+        {course.thumbIcon?.startsWith('http') || course.thumbIcon?.startsWith('/') ? (
+          <img src={course.thumbIcon} alt="thumbnail" className="object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5" />
+        ) : (
+          <span className="text-[52px] drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5" aria-hidden="true">{course.thumbIcon}</span>
+        )}
       </div>
 
       <CardContent className="p-4 pt-4 flex flex-col gap-2 flex-1">
@@ -207,17 +210,17 @@ export default function CoursesPage() {
           slug: c?.slug,
           thumbClass: c?.accent || 'bg-gradient-thumbnail',
           thumbIcon: c?.thumbnail || '🎓', 
-          level: c?.level,
-          levelColor: c?.level.toLowerCase().includes('beginner') ? 'green' : 'blue',
+          level: c?.level || 'All Levels',
+          levelColor: c?.level?.toLowerCase().includes('beginner') ? 'green' : 'blue',
           title: c?.title,
           desc: c?.short_description || c?.description,
-          hours: `${Math.floor(c?.duration / 60)}h ${c?.duration % 60}m`,
-          lessons: c?._count?.modules || 0, 
+          hours: `${Math.floor((c?.duration || 0) / 60)}h ${(c?.duration || 0) % 60}m`,
+          lessons: c?.modules?.reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 0,
           price: `₹${c?.price}`,
-          rating: c?.rating || 4.5,
+          rating: c?.reviews?.length ? Number((c.reviews.reduce((acc, r) => acc + r.rating, 0) / c.reviews.length).toFixed(1)) : 4.5,
           students: c?.students || 0,
           bestseller: c?.bestseller || false,
-          certificate: true,
+          certificate: c?.certificate ?? true,
           tags: [c?.level, c?.category].filter(Boolean),
         }))
         setCourses(formatted)
