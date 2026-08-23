@@ -348,9 +348,6 @@ export default function CourseDetailPage() {
 
   return (
     <>
-      
-     
-
       <LightNavbar />
 
       <main className="min-h-screen bg-gray-50" id="main-content">

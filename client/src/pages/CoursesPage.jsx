@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { getAllcourses } from '../services/courses.services'
+import { getAllCourses } from '../services/courses.services'
 import { useAuth } from '../context/AuthContext'
 import { Search, Bell, Clock, BookOpen, Award } from 'lucide-react'
 import { Button } from '../component/ui/Button'
@@ -201,8 +201,7 @@ export default function CoursesPage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const data = await getAllcourses()
-        console.log(data);
+        const data = await getAllCourses()
         
         // Map backend data to UI format
         const formatted = data.courses.map(c => ({
@@ -264,8 +263,6 @@ export default function CoursesPage() {
 
   return (
     <>
-  
-      <meta name="description" content="Browse all Skillora developer courses. Filter by level, search by topic and start your learning journey today." />
 
       <LightNavbar />
 

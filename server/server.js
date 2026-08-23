@@ -3,7 +3,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import courseRoutes from "./routes/course.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
-import {prisma} from "./lib/prisma.js";
+import { prisma } from "./lib/prisma.js";
 import cookieParser from "cookie-parser";
 
 const app = express();

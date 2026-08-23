@@ -14,7 +14,6 @@ import { useAuth } from './context/AuthContext';
 const AppLayout = () => {
   const { user } = useAuth();
   const location = useLocation();
-  console.log(user);
   
   if (user && ['/', '/login', '/signup'].includes(location.pathname)) {
     return <Navigate to="/courses" replace />;

@@ -60,24 +60,24 @@ export default function SignupPage() {
 
 
   async function handleSubmit(e) {
-    try{
-      setLoading(true)
-      e.preventDefault()
-      const errs = validate(form.name, form.email, form.password, agreed)
-      if (Object.keys(errs).length) { setErrors(errs); return }
-      
-      const res = await signupUser(form)
+    e.preventDefault();
+    const errs = validate(form.name, form.email, form.password, agreed);
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+
+    try {
+      setLoading(true);
+      const res = await signupUser(form);
       if (res && res.success !== false) {
-        showToast('🎉', 'Account created! Welcome to Skillora 🚀')
-        setTimeout(() => navigate('/courses'), 1000)
+        showToast('🎉', 'Account created! Welcome to Skillora 🚀');
+        setTimeout(() => navigate('/courses'), 1000);
       } else {
-        showToast('❌', res?.message || 'Registration Failed')
+        showToast('❌', res?.message || 'Registration Failed');
       }
-    }
-    catch(error){
-      setLoading(false)
-      console.log(error)
-      showToast("❌", error.response?.data?.message || "Registration Failed")
+    } catch (error) {
+      console.error(error);
+      showToast('❌', error.response?.data?.message || 'Registration Failed');
+    } finally {
+      setLoading(false);
     }
   }
 
