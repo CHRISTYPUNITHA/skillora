@@ -217,7 +217,9 @@ function PriceCard({ course }) {
           id="btn-enroll-now"
           aria-label={`Enroll in ${course.title} for ${course.price}`}
         >
-          Enroll Now
+          <Link to={`/checkout/${course.id}`} className="w-full h-full flex items-center justify-center">
+            Enroll Now
+          </Link>
         </Button>
         
         

@@ -1,6 +1,4 @@
-
-import { Routes, Route, Navigate } from 'react-router-dom'
-
+import { createBrowserRouter, RouterProvider, Navigate, Outlet, useLocation } from 'react-router-dom'
 
 import LandingPage      from './pages/LandingPage'
 import CoursesPage      from './pages/CoursesPage'
@@ -11,32 +9,37 @@ import CheckoutPage     from './pages/CheckoutPage'
 import MyLearningPage   from './pages/MyLearningPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import { useAuth } from './context/AuthContext';
-import { useLocation } from 'react-router-dom';
 
 
-export default function App() {
+const AppLayout = () => {
   const { user } = useAuth();
   const location = useLocation();
   console.log(user);
   
-
   if (user && ['/', '/login', '/signup'].includes(location.pathname)) {
     return <Navigate to="/courses" replace />;
   }
 
-  return (
-    <Routes>
-      <Route path="/"                 element={<LandingPage />}      />
-      <Route path="/courses"          element={<CoursesPage />}      />
-      <Route path="/courses/:slug"    element={<CourseDetailPage />} />
-      <Route path="/login"            element={<LoginPage />}        />
-      <Route path="/signup"           element={<SignupPage />}        />
-      <Route path="/checkout"          element={<CheckoutPage />}        />
-      <Route path="/my-learning"       element={<MyLearningPage />}      />
-      <Route path="/payment-success"   element={<PaymentSuccessPage />}  />
-      {/* Fallback — redirect unknown paths to home */}
-      <Route path="*"                 element={<Navigate to="/" replace />} />
-    </Routes>
-  )
-}
+  return <Outlet />;
+};
 
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [
+      { path: "/", element: <LandingPage /> },
+      { path: "/courses", element: <CoursesPage /> },
+      { path: "/courses/:slug", element: <CourseDetailPage /> },
+      { path: "/login", element: <LoginPage /> },
+      { path: "/signup", element: <SignupPage /> },
+      { path: "/checkout/:courseId", element: <CheckoutPage /> },
+      { path: "/my-learning", element: <MyLearningPage /> },
+      { path: "/payment-success", element: <PaymentSuccessPage /> },
+      { path: "*", element: <Navigate to="/" replace /> }
+    ]
+  }
+]);
+
+export default function App() {
+  return <RouterProvider router={router} />;
+}

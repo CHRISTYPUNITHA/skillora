@@ -1,13 +1,5 @@
-/**
- * CheckoutPage.jsx
- * Route: /checkout
- *
- * Two-column checkout layout — "Your Order" + "Payment Details"
- * Styling: 100% Tailwind CSS v4 — no raw CSS / .css imports
- * Components: Button, Card, CardContent, Badge (all from component/ui)
- */
-
-import { Link, useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import {
   ArrowLeft,
   ShieldCheck,
@@ -19,23 +11,16 @@ import {
   Star,
   BookOpen,
   Award,
+  Loader2
 } from "lucide-react"
 import { Button } from "../component/ui/Button"
 import { Badge } from "../component/ui/Badge"
 import { Card, CardContent } from "../component/ui/Card"
 import { Divider } from "../component/ui/Divider"
+import { getCourseById } from "../services/courses.services"
+import { createOrder, verifyPayment } from "../services/payment.services"
 
 /* ─── Static data ─────────────────────────────────────── */
-const COURSE = {
-  title: "Full-Stack Foundations",
-  level: "Beginner to Intermediate",
-  price: 799,
-  originalPrice: 1999,
-  duration: "8h 20m",
-  lessons: 32,
-  thumbnail: "bg-gradient-to-br from-[#100D2E] to-[#6C4CF0]",
-}
-
 const SECURITY_FEATURES = [
   { icon: ShieldCheck, text: "Secure payment powered by Razorpay" },
   { icon: Zap,         text: "One-time payment. No hidden charges." },
@@ -44,8 +29,8 @@ const SECURITY_FEATURES = [
 
 const COURSE_INCLUDES = [
   { icon: Clock,    text: "Lifetime access" },
-  { icon: BookOpen, text: "32 lessons" },
-  { icon: Clock,    text: "8h 20m of content" },
+  { icon: BookOpen, text: "Self-paced learning" },
+  { icon: Clock,    text: "High-quality content" },
   { icon: Award,    text: "Certificate of completion" },
   { icon: CreditCard, text: "Access on mobile & TV" },
 ]
@@ -56,7 +41,7 @@ const COURSE_INCLUDES = [
 function CourseThumbnail({ gradient }) {
   return (
     <div
-      className={`w-16 h-16 rounded-xl flex-shrink-0 flex items-center justify-center ${gradient} shadow-lg`}
+      className={`w-16 h-16 rounded-xl flex-shrink-0 flex items-center justify-center ${gradient || "bg-gradient-to-br from-[#100D2E] to-[#6C4CF0]"} shadow-lg`}
     >
       <BookOpen className="w-7 h-7 text-white/90" />
     </div>
@@ -104,23 +89,148 @@ function PaymentBadge({ label, accent = "bg-gray-50 border-gray-200" }) {
   )
 }
 
+function loadScript(src) {
+  return new Promise((resolve) => {
+    const script = document.createElement("script")
+    script.src = src
+    script.onload = () => {
+      resolve(true)
+    }
+    script.onerror = () => {
+      resolve(false)
+    }
+    document.body.appendChild(script)
+  })
+}
+
 /* ─── Page ────────────────────────────────────────────── */
 export default function CheckoutPage() {
   const navigate = useNavigate()
+  const { courseId } = useParams()
+  const [course, setCourse] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [paymentProcessing, setPaymentProcessing] = useState(false)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    if (!courseId) {
+      setError("No course selected for checkout.")
+      setLoading(false)
+      return
+    }
+
+    const fetchCourse = async () => {
+      try {
+        const data = await getCourseById(courseId)
+        // Handle response format: { success: true, course: {...} }
+        const courseData = data.course || data
+        setCourse({
+          ...courseData,
+          price: Number(courseData.price) || 0,
+          originalPrice: courseData.originalPrice ? Number(courseData.originalPrice) : null,
+          duration: courseData.duration || 0,
+        })
+      } catch (err) {
+        console.error(err)
+        setError("Failed to load course details.")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchCourse()
+  }, [courseId])
+
+  const handlePayment = async () => {
+    setPaymentProcessing(true)
+    setError("")
+
+    try {
+      // 1. Load Razorpay script
+      const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js")
+      if (!res) {
+        setError("Razorpay SDK failed to load. Are you online?")
+        setPaymentProcessing(false)
+        return
+      }
+
+      // 2. Create order on backend
+      const orderData = await createOrder(courseId)
+
+      // 3. Configure Razorpay options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "dummy_key", // Frontend uses VITE_ prefix if loaded from env, or pass key from backend
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Skillora",
+        description: `Enrollment for ${course.title}`,
+        order_id: orderData.orderId,
+        handler: async function (response) {
+          try {
+            // 4. Verify payment on backend
+            await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            })
+            // 5. Navigate to success page
+            navigate("/payment-success")
+          } catch (verifyError) {
+            console.error(verifyError)
+            setError("Payment verification failed. Please contact support.")
+          }
+        },
+        prefill: {
+          name: "User",
+          email: "user@example.com",
+        },
+        theme: {
+          color: "#6C4CF0",
+        },
+      }
+
+      const paymentObject = new window.Razorpay(options)
+      paymentObject.open()
+      paymentObject.on('payment.failed', function (response) {
+        setError("Payment failed: " + response.error.description)
+      })
+    } catch (err) {
+      console.error(err)
+      setError(err?.response?.data?.message || "Failed to initiate payment. Please try again.")
+    } finally {
+      setPaymentProcessing(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error || !course) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+        <p className="text-red-500 font-semibold mb-4">{error}</p>
+        <Button onClick={() => navigate("/courses")}>Back to Courses</Button>
+      </div>
+    )
+  }
+
   const discount = 0
-  const total = COURSE.price - discount
+  const total = course.price - discount
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-
       {/* ── Top navigation bar ── */}
       <nav className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
         <Link
-          to="/courses"
+          to={`/courses/${course.slug}`}
           className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-purple-600 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Courses
+          Back to Course
         </Link>
       </nav>
 
@@ -151,28 +261,30 @@ export default function CheckoutPage() {
 
               {/* Course item row */}
               <div className="flex items-start gap-4">
-                <CourseThumbnail gradient={COURSE.thumbnail} />
+                <CourseThumbnail gradient={course.accent} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">
-                    {COURSE.title}
+                    {course.title}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">{COURSE.level}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{course.level}</p>
                   <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {COURSE.duration}
+                      <Clock className="w-3.5 h-3.5" /> {course.duration} mins
                     </span>
                     <span className="flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5" /> {COURSE.lessons} Lessons
+                      <BookOpen className="w-3.5 h-3.5" /> Self-paced
                     </span>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-sm font-bold text-gray-900">
-                    ₹{COURSE.price}
+                    ₹{course.price}
                   </p>
-                  <p className="text-xs line-through text-gray-300 mt-0.5">
-                    ₹{COURSE.originalPrice}
-                  </p>
+                  {course.originalPrice && (
+                    <p className="text-xs line-through text-gray-300 mt-0.5">
+                      ₹{course.originalPrice}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -180,7 +292,7 @@ export default function CheckoutPage() {
 
               {/* Price breakdown */}
               <div className="space-y-3">
-                <PriceRow label="Subtotal"  value={`₹${COURSE.price}`} />
+                <PriceRow label="Subtotal"  value={`₹${course.price}`} />
                 <PriceRow label="Discount"  value={discount ? `-₹${discount}` : "-₹0"} />
                 <Divider />
                 <PriceRow label="Total" value={`₹${total}`} isTotal />
@@ -237,10 +349,11 @@ export default function CheckoutPage() {
                 <Button
                   id="pay-now-btn"
                   size="lg"
-                  onClick={() => navigate("/payment-success")}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-semibold shadow-lg shadow-purple-200 transition-all duration-200 hover:scale-[1.02] active:scale-100"
+                  onClick={handlePayment}
+                  disabled={paymentProcessing}
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-semibold shadow-lg shadow-purple-200 transition-all duration-200 hover:scale-[1.02] active:scale-100 disabled:opacity-70 disabled:hover:scale-100"
                 >
-                  Pay ₹{total} Securely
+                  {paymentProcessing ? "Processing..." : `Pay ₹${total} Securely`}
                 </Button>
 
                 {/* Payment method logos */}

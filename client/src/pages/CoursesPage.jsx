@@ -10,7 +10,6 @@ import { Card, CardContent, CardFooter } from '../component/ui/Card'
 import { Badge } from '../component/ui/Badge'
 import { Tabs, TabsList, TabsTrigger } from '../component/ui/Tabs'
 import '../App.css'
-import {getAllcourses} from '../services/courses.services.js'
 // Mock data removed in favor of real API data
 
 const LEVELS = ['All Levels', 'Beginner', 'Intermediate', 'Advanced']
