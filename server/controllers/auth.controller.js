@@ -44,7 +44,7 @@ export const loginUser = async (req, res) => {
         }
 
         const token = generateToken(user);
-        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', path: '/' });
         res.status(200).json({ success: true, message: 'Login successful', token });
     } catch (error) {
         console.error(error);
@@ -75,7 +75,7 @@ export const logoutUser = async (req, res) => {
         if (!userId) {
             return res.status(400).json({ success: false, message: 'User not found' });
         }
-        res.clearCookie('token');
+        res.clearCookie('token', { path: '/' });
         res.status(200).json({ success: true, message: 'Logout successful' });
     } catch (error) {
         console.error(error);

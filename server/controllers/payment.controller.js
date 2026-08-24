@@ -12,6 +12,10 @@ export const createOrder = async (req, res) => {
     const { courseId } = req.body;
     const userId = req.user.id;
 
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
     if (!courseId) {
       return res.status(400).json({ message: 'Course ID is required' });
     }
